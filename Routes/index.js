@@ -4,6 +4,7 @@ import {
 	SplashScreen,
   BoardingScreen,
   Login,
+	Main
 } from '../Pages'
 
 const Stack = createStackNavigator();
@@ -20,6 +21,7 @@ const Routes = () => {
 			<Stack.Screen name="SplashScreen" component={SplashScreen} />
 			<Stack.Screen name="BoardingScreen" component={BoardingScreen} />
 			<Stack.Screen name="Login" component={Login} />
+			<Stack.Screen name="Main" component={Main} />
 
     </Stack.Navigator>  
   )

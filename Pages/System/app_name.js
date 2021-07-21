@@ -1,3 +1,3 @@
-const app_name = "QC Apps (2nd Process)"
+const app_name = "2nd App"
 
 export default app_name

@@ -32,9 +32,9 @@ const Login = ({navigation}) => {
 	};
 
   useEffect(() => {
-    messaging().getToken().then(token => {
-			setRegistration_ids(token)
-		});
+    // messaging().getToken().then(token => {
+		// 	setRegistration_ids(token)
+		// });
 		
     // Firebase.initializeApp()
 		// PushNotification.configure({
@@ -84,8 +84,9 @@ const Login = ({navigation}) => {
 		.then(res => {
       if(res.data.data != null){
         setLoading(true)
-        DeviceStorage(res.data.data.token)
-				Session(res.data.data)
+				console.log(res.data)
+        // DeviceStorage(res.data.data.token)
+				// Session(res.data.data)
 				navigation.replace('Main')
       }else{
         setLoading(true)
