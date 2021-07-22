@@ -80,13 +80,14 @@ const Login = ({navigation}) => {
 			app_name,
 			registration_ids
 		}
-		Axios.post(`${base_url}/signin`, data)
+		// Axios.post(`${base_url}/signin`, data)
+		Axios.post(`http://192.168.131.121:3000/signin`, data)
 		.then(res => {
       if(res.data.data != null){
         setLoading(true)
-				console.log(res.data)
-        // DeviceStorage(res.data.data.token)
-				// Session(res.data.data)
+				// console.log(res.data)
+        DeviceStorage(res.data.data.token)
+				Session(res.data.data)
 				navigation.replace('Main')
       }else{
         setLoading(true)

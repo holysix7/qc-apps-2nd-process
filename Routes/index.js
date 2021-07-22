@@ -4,7 +4,9 @@ import {
 	SplashScreen,
   BoardingScreen,
   Login,
-	Main
+	Main,
+	ShowProducts,
+	FormByProduct
 } from '../Pages'
 
 const Stack = createStackNavigator();
@@ -22,6 +24,8 @@ const Routes = () => {
 			<Stack.Screen name="BoardingScreen" component={BoardingScreen} />
 			<Stack.Screen name="Login" component={Login} />
 			<Stack.Screen name="Main" component={Main} />
+			<Stack.Screen name="ShowProducts" component={ShowProducts} />
+			<Stack.Screen name="FormByProduct" component={FormByProduct} />
 
     </Stack.Navigator>  
   )

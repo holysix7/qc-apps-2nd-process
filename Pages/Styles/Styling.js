@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     },
     productsButtonRunning: {
         marginTop: 5, 
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center', 
         width: "100%", 
         borderRadius: 15,
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     productsButtonStop: {
         backgroundColor: '#663f3f',
         marginTop: 5, 
-        alignItems: 'center', 
+        alignItems: 'flex-start', 
         justifyContent: 'center', 
         width: "100%", 
         borderRadius: 15, 

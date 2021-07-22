@@ -13,10 +13,12 @@ import axios from 'axios';
 import app_version from '../System/app_version';
 import app_name from '../System/app_name';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { forHorizontalIOS } from '@react-navigation/stack/lib/typescript/src/TransitionConfigs/CardStyleInterpolators';
 
 const Main = ({navigation}) => {
   
-  const [cekId, setCekId]             = useState("");
+  const [cekId, setCekId]             = useState(null);
+  const [user_id, setUserId]          = useState(null);
   const [name, setCekName]            = useState("");
   const [deptName, setCekDeptName]    = useState("");
   const [versionIQC, setVersionIQC]   = useState(null);
@@ -29,157 +31,46 @@ const Main = ({navigation}) => {
   const [refreshing, setRefreshing]   = useState(false);
 
   useEffect(() => {
-    dummyFunc()
-    // session()
-    // setInterval(() => {
-    //   setLoading(true)
-    // }, 2000);
+    session()
   }, [])
-
-  const dummyFunc = () => {
-    setCekId(1)
-    lines(1)
-    // setLoading(true)
-  }
 
   const lines = async(value) => {
     console.log(value)
     setCekId(value)
     setLoading(false)
-    switch (value) {
-      case 1:
-        var dummies = [
-          {
-            line_id: 1,
-            line_name: 'Ini Line Pertama',
-            line_number: 1,
-            sys_plant_id: value
-          },
-          {
-            line_id: 2,
-            line_name: 'Ini Line Kedua',
-            line_number: 2,
-            sys_plant_id: value
-          },
-          {
-            line_id: 3,
-            line_name: 'Ini Line Ketiga',
-            line_number: 3,
-            sys_plant_id: value
-          },
-          {
-            line_id: 4,
-            line_name: 'Ini Line Keempat',
-            line_number: 4,
-            sys_plant_id: value
-          },
-          {
-            line_id: 5,
-            line_name: 'Ini Line Kelima',
-            line_number: 5,
-            sys_plant_id: value
-          },
-          {
-            line_id: 6,
-            line_name: 'Ini Line Keenam',
-            line_number: 6,
-            sys_plant_id: value
-          },
-
-        ]
-        setDummyData(dummies)
-        setLoading(true)
-        break;
-      
-      case 2:
-        var dummies = [
-          {
-            line_id: 1,
-            line_name: 'Ini Line Pertama',
-            line_number: 1,
-            sys_plant_id: value
-          },
-          {
-            line_id: 2,
-            line_name: 'Ini Line Kedua',
-            line_number: 2,
-            sys_plant_id: value
-          },
-          {
-            line_id: 3,
-            line_name: 'Ini Line Ketiga',
-            line_number: 3,
-            sys_plant_id: value
-          },
-          {
-            line_id: 6,
-            line_name: 'Ini Line Keenam',
-            line_number: 6,
-            sys_plant_id: value
-          },
-
-        ]
-        setDummyData(dummies)
-        setLoading(true)
-        break;
-      
-      case 3:
-        var dummies = [
-          {
-            line_id: 1,
-            line_name: 'Ini Line Pertama',
-            line_number: 1,
-            sys_plant_id: value
-          },
-          {
-            line_id: 5,
-            line_name: 'Ini Line Kelima',
-            line_number: 5,
-            sys_plant_id: value
-          },
-          {
-            line_id: 6,
-            line_name: 'Ini Line Keenam',
-            line_number: 6,
-            sys_plant_id: value
-          },
-
-        ]
-        setDummyData(dummies)
-        setLoading(true)
-        break;
-      
-      default:
-        setLoading(true)
-        break;
+    const token = await AsyncStorage.getItem("key")
+    const user_id = await AsyncStorage.getItem("id")
+    setUserId(user_id)
+    const headers = {
+      'Authorization': token
     }
-    // const token = await AsyncStorage.getItem("key")
-    // const headers = {
-    //   'Authorization': token
-    // }
-    // const params = {
-    //   tbl: 'machine',
-    //   kind: 'machine',
-    //   sys_plant_id: value,
-    //   app_version: app_version
-    // }
-    // axios.get('https://api.tri-saudara.com/api/v2/qcs', {params: params, headers: headers})
-    // .then(response => {
-    //   setLoading(true)
-    //   setData(response.data.data)
-    //   setRefreshing(false)
-    //   console.log("Machines List Data: ", response.data.status, "OK")
-    // })
-    // .catch(error => {
-    //   Alert.alert(
-    //     "Info",
-    //     "Silahkan Login Kembali",
-    //     [
-    //       { text: "OK", onPress: () => logout() }
-    //     ],
-    //     { cancelable: false }
-    //   );
-    // })
+    const params = {
+      // tbl: 'machine',
+      // kind: 'machine',
+      sys_plant_id: value,
+      user_id: user_id,
+      app_version: app_version
+    }
+    axios.get('http://192.168.131.121:3000/api/v2/secprocs?', {params: params, headers: headers})
+    .then(response => {
+      setLoading(true)
+      setData(response.data.data)
+      setRefreshing(false)
+      console.log("Machines List Data: ", response.data.status, "OK")
+    })
+    .catch(error => {
+      console.log(error)
+      setLoading(true)
+      Alert.alert(
+        "Info",
+        "Silahkan Login Kembali",
+        [
+          { text: "OK", onPress: () => logout() }
+          // { text: "OK", onPress: () => console.log('logout boiys') }
+        ],
+        { cancelable: false }
+      );
+    })
   }
 
   const logout = async() => {
@@ -207,6 +98,7 @@ const Main = ({navigation}) => {
       setCekName(name)
       setVersionIQC(current_version_iqc)
       setFeature(JSON.parse(feature))
+      lines(sys_plant_id)
     } catch (error) {
       console.log('Multi Get Error: ', error.message)
     }
@@ -247,146 +139,158 @@ const Main = ({navigation}) => {
 
   const listLines = () => {
     var records = []
-    if(dummyData.length > 0){
-      dummyData.map((val, key) => {
+    if(cekId != null){
+      if(data.length > 0){
+        data.map(element => {
+          records.push(
+            <Button key={element.id} style={styles.machineLoaded}
+            onPress={() => {
+              navigation.navigate('ShowProducts', {
+                line_id: element.id,
+                line_name: element.name,
+                line_number: element.number,
+                sys_plant_id: element.sys_plant_id,
+                line_status: element.status,
+                user_id: user_id
+              })
+            }}
+            >
+              <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
+                <View style={{flexDirection: 'column'}}>
+                  <Text style={styles.putihBold}>{element.number}</Text> 
+                </View>
+              </View>
+              <Text style={{fontSize: 6}}>{element.name}</Text>
+            </Button>
+          )
+          // if(element.status == 'loaded'){
+          //   machines.push(
+          //     <Button key={element.id} style={styles.machineLoaded}
+          //     onPress={() => {
+          //       navigation.navigate('ShowProducts', {
+          //         machine_id: element.id,
+          //         machine_name: element.name,
+          //         machine_number: element.number,
+          //         sys_plant_id: element.sys_plant_id,
+          //       })
+          //     }}
+          //     >
+          //       <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
+          //         <View style={{flexDirection: 'column'}}>
+          //           <Text style={styles.putihBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
+          //         </View>
+          //         <View style={{flexDirection: 'column'}}>
+          //           {element.product_id != null ? <Image source={CalendarWhite} style={{width: 20, height: 20}} /> : null}
+          //         </View>
+          //       </View>
+          //       <Text style={{fontSize: 6}}>{element.name}</Text>
+          //     </Button>
+          //   )
+          // }else if(element.status == 'no_load'){
+          //   machines.push(
+          //     <Button key={element.id} style={styles.machineNoLoad}
+          //     onPress={() => {
+          //       navigation.navigate('ShowProducts', {
+          //         machine_id: element.id,
+          //         machine_name: element.name,
+          //         machine_number: element.number,
+          //         sys_plant_id: element.sys_plant_id,
+          //       })
+          //     }}
+          //     >
+          //       <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
+          //         <View style={{flexDirection: 'column'}}>
+          //           <Text style={styles.hitamBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
+          //         </View>
+          //         <View style={{flexDirection: 'column'}}>
+          //           {element.product_id != null ? <Image source={CalendarBlack} style={{width: 20, height: 20}} /> : null}
+          //         </View>
+          //       </View>
+          //       <Text style={{fontSize: 6, color: 'black'}}>{element.name}</Text>
+          //     </Button>
+          //   )
+          // }else if(element.status == 'broken'){
+          //   machines.push(
+          //     <Button key={element.id} style={styles.machineBroken}
+          //     onPress={() => {
+          //       navigation.navigate('ShowProducts', {
+          //         machine_id: element.id,
+          //         machine_name: element.name,
+          //         machine_number: element.number,
+          //         sys_plant_id: element.sys_plant_id,
+          //       })
+          //     }}
+          //     >
+          //       <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
+          //         <View style={{flexDirection: 'column'}}>
+          //           <Text style={styles.hitamBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
+          //         </View>
+          //         <View style={{flexDirection: 'column'}}>
+          //           {element.product_id != null ? <Image source={CalendarBlack} style={{width: 20, height: 20}} /> : null}
+          //         </View>
+          //       </View>
+          //       <Text style={{fontSize: 6, color: 'black'}}>{element.name}</Text>
+          //     </Button>
+          //   )
+          // }else if(element.status == 'maintenance'){
+          //   machines.push(
+          //     <Button key={element.id} style={styles.machineMaintenance}
+          //     onPress={() => {
+          //       navigation.navigate('ShowProducts', {
+          //         machine_id: element.id,
+          //         machine_name: element.name,
+          //         machine_number: element.number,
+          //         sys_plant_id: element.sys_plant_id,
+          //       })
+          //     }}
+          //     >
+          //       <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
+          //         <View style={{flexDirection: 'column'}}>
+          //           <Text style={styles.hitamBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
+          //         </View>
+          //         <View style={{flexDirection: 'column'}}>
+          //           {element.product_id != null ? <Image source={CalendarBlack} style={{width: 20, height: 20}} /> : null}
+          //         </View>
+          //       </View>
+          //       <Text style={{fontSize: 6, color: 'black'}}>{element.name}</Text>
+          //     </Button>
+          //   )
+    
+          // }else{
+          //   machines.push(
+          //     <Button key={element.id} style={styles.machineElse}
+          //     onPress={() => {
+          //       navigation.navigate('ShowProducts', {
+          //         machine_id: element.id,
+          //         machine_name: element.name,
+          //         machine_number: element.number,
+          //         sys_plant_id: element.sys_plant_id,
+          //       })
+          //     }}
+          //     >
+          //       <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
+          //         <View style={{flexDirection: 'column'}}>
+          //           <Text style={styles.putihBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
+          //         </View>
+          //         <View style={{flexDirection: 'column'}}>
+          //           {element.product_id != null ? <Image source={CalendarWhite} style={{width: 20, height: 20}} /> : null}
+          //         </View>
+          //       </View>
+          //       <Text style={{fontSize: 6}}>{element.name}</Text>
+          //     </Button>
+          //   )
+          // }
+        });
+      }else{
         records.push(
-          <Button key={key} style={styles.machineLoaded}
-            onPress={() => alert('wkwk') }>
-            <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
-              <View style={{flexDirection: 'column'}}>
-                <Text style={styles.putihBold}>{val.line_id != null ? <Text style={styles.asterixMerah}>*</Text> : null} {val.line_number}</Text> 
-              </View>
-              <View style={{flexDirection: 'column'}}>
-                {val.line_id != null ? <Image source={CalendarWhite} style={{width: 20, height: 20}} /> : null}
-              </View>
+          <View key={'wkwkw'} style={{width: '100%', padding: 25, flexDirection: 'row', justifyContent: 'center'}}>
+            <View style={{justifyContent: 'center', height: 200, padding: 10, borderRadius: 10, backgroundColor: '#F3F2C9'}}>
+              <Text style={{textAlign: 'justify', color: 'grey'}}>Tidak ada data line di plant ini</Text>
             </View>
-            <Text style={{fontSize: 6}}>{val.line_name}</Text>
-          </Button>
+          </View>
         )
-      })
+      }
     }
-    // if(cekId != null){
-    //   data.forEach(element => {
-    //     console.log(element)
-    //     if(element.status == 'loaded'){
-    //       machines.push(
-    //         <Button key={element.id} style={styles.machineLoaded}
-    //         onPress={() => {
-    //           navigation.navigate('ShowProducts', {
-    //             machine_id: element.id,
-    //             machine_name: element.name,
-    //             machine_number: element.number,
-    //             sys_plant_id: element.sys_plant_id,
-    //           })
-    //         }}
-    //         >
-    //           <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
-    //             <View style={{flexDirection: 'column'}}>
-    //               <Text style={styles.putihBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
-    //             </View>
-    //             <View style={{flexDirection: 'column'}}>
-    //               {element.product_id != null ? <Image source={CalendarWhite} style={{width: 20, height: 20}} /> : null}
-    //             </View>
-    //           </View>
-    //           <Text style={{fontSize: 6}}>{element.name}</Text>
-    //         </Button>
-    //       )
-    //     }else if(element.status == 'no_load'){
-    //       machines.push(
-    //         <Button key={element.id} style={styles.machineNoLoad}
-    //         onPress={() => {
-    //           navigation.navigate('ShowProducts', {
-    //             machine_id: element.id,
-    //             machine_name: element.name,
-    //             machine_number: element.number,
-    //             sys_plant_id: element.sys_plant_id,
-    //           })
-    //         }}
-    //         >
-    //           <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
-    //             <View style={{flexDirection: 'column'}}>
-    //               <Text style={styles.hitamBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
-    //             </View>
-    //             <View style={{flexDirection: 'column'}}>
-    //               {element.product_id != null ? <Image source={CalendarBlack} style={{width: 20, height: 20}} /> : null}
-    //             </View>
-    //           </View>
-    //           <Text style={{fontSize: 6, color: 'black'}}>{element.name}</Text>
-    //         </Button>
-    //       )
-    //     }else if(element.status == 'broken'){
-    //       machines.push(
-    //         <Button key={element.id} style={styles.machineBroken}
-    //         onPress={() => {
-    //           navigation.navigate('ShowProducts', {
-    //             machine_id: element.id,
-    //             machine_name: element.name,
-    //             machine_number: element.number,
-    //             sys_plant_id: element.sys_plant_id,
-    //           })
-    //         }}
-    //         >
-    //           <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
-    //             <View style={{flexDirection: 'column'}}>
-    //               <Text style={styles.hitamBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
-    //             </View>
-    //             <View style={{flexDirection: 'column'}}>
-    //               {element.product_id != null ? <Image source={CalendarBlack} style={{width: 20, height: 20}} /> : null}
-    //             </View>
-    //           </View>
-    //           <Text style={{fontSize: 6, color: 'black'}}>{element.name}</Text>
-    //         </Button>
-    //       )
-    //     }else if(element.status == 'maintenance'){
-    //       machines.push(
-    //         <Button key={element.id} style={styles.machineMaintenance}
-    //         onPress={() => {
-    //           navigation.navigate('ShowProducts', {
-    //             machine_id: element.id,
-    //             machine_name: element.name,
-    //             machine_number: element.number,
-    //             sys_plant_id: element.sys_plant_id,
-    //           })
-    //         }}
-    //         >
-    //           <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
-    //             <View style={{flexDirection: 'column'}}>
-    //               <Text style={styles.hitamBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
-    //             </View>
-    //             <View style={{flexDirection: 'column'}}>
-    //               {element.product_id != null ? <Image source={CalendarBlack} style={{width: 20, height: 20}} /> : null}
-    //             </View>
-    //           </View>
-    //           <Text style={{fontSize: 6, color: 'black'}}>{element.name}</Text>
-    //         </Button>
-    //       )
-  
-    //     }else{
-    //       machines.push(
-    //         <Button key={element.id} style={styles.machineElse}
-    //         onPress={() => {
-    //           navigation.navigate('ShowProducts', {
-    //             machine_id: element.id,
-    //             machine_name: element.name,
-    //             machine_number: element.number,
-    //             sys_plant_id: element.sys_plant_id,
-    //           })
-    //         }}
-    //         >
-    //           <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
-    //             <View style={{flexDirection: 'column'}}>
-    //               <Text style={styles.putihBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
-    //             </View>
-    //             <View style={{flexDirection: 'column'}}>
-    //               {element.product_id != null ? <Image source={CalendarWhite} style={{width: 20, height: 20}} /> : null}
-    //             </View>
-    //           </View>
-    //           <Text style={{fontSize: 6}}>{element.name}</Text>
-    //         </Button>
-    //       )
-    //     }
-    //   });
-    // }
     return records
   }
 
