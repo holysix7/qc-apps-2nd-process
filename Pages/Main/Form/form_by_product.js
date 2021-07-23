@@ -9,7 +9,7 @@ import app_version from	'../../System/app_version';
 import base_url from	'../../System/base_url';
 
 const form_by_product = ({route, navigation}) => {
-  const {id_part, secproc_planning_product_id, eng_product_id, product_name, product_internal_part_id, product_customer_part_number, quantity, mkt_customer_name, product_model, sys_plant_id, line_name, line_status} = route.params
+  const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name} = route.params
 	useEffect(() => {
 		get_data()
 	}, [])
@@ -34,74 +34,60 @@ const form_by_product = ({route, navigation}) => {
 
 	const submit = async() => {
 		setLoading(false)
-		const id = await AsyncStorage.getItem('id')
-		console.log('data: ', data)
+		const user_id = await AsyncStorage.getItem('id')
 		const token = await AsyncStorage.getItem("key")
-		const params = {
-			tbl: 'daily_inspection',
-			kind: 'masspro_mm',
+		var body = {
+			tbl: 'planning_pic_product',
 			update_hour: sys_plant_id,
-			app_version: app_version
+			app_version: app_version,
+			user_id: user_id,
+			secproc_planning_product_item_id: secproc_planning_product_item_id,
+			operator_process: operator_process,
+			sys_plant_id: sys_plant_id
 		}
+		console.log(body)
 		var config = {
-			method: 'put',
-			url: base_url,
-			params: params,
+			method: 'post',
+			url: `${base_url}/api/v2/secprocs`,
+			// params: params,
 			headers: { 
 				'Authorization': token, 
 				'Content-Type': 'application/json', 
 				'Cookie': '_denapi_session=ubcfq3AHCuVeTlxtg%2F1nyEa3Ktylg8nY1lIEPD7pgS3YAWwlKOxwA0S9pw7JhvZ2mNkrYl0j62wAWJWJZd7AbfolGuHCwXgEMeJH6EoLiQ%3D%3D--M%2BjBb0uJeHmOf%2B3o--%2F2Fjw57x0Fyr90Ec9FVibQ%3D%3D'
 			},
-			data : data
+			data : body
 		};
-		if(parseInt(tooling) > 0 && mold_condition != null && neeple_cooling != null && standard_part != null){
-			Axios(config)
-			.then(function (response){
-				console.log("Res: ", response.status, " Ok")
-				setLoading(true)
-				Alert.alert(
-					"Success Send Data",
-					"Berhasil Menyimpan Data",
-					[
-						{ 
-							text: "OK", 
-							onPress: () => console.log('200 OK') 
-						}
-					],
-					{ cancelable: false }
-				)
-				navigation.navigate('ShowPlanning')
-			})
-			.catch(function (error){
-				setLoading(true)
-				Alert.alert(
-					"Failed Send Data",
-					"Gagal Kirim Data, Hubungi IT Department",
-					[
-						{ 
-							text: "OK", 
-							onPress: () => console.log('400 BAD') 
-						}
-					],
-					{ cancelable: false }
-				)
-				console.log(error)
-			})
-		}else{
-			console.log("Gabisa Save Bro")
+		Axios(config)
+		.then(function (response){
+			console.log("Res: ", response.status, " Ok")
 			setLoading(true)
 			Alert.alert(
-				"Failed Send Data",
-				"Gagal Kirim Data, Harap Perhatikan Form Input!",
+				"Success Send Data",
+				"Berhasil Menyimpan Data",
 				[
 					{ 
 						text: "OK", 
-						onPress: () => console.log('400 BAD') 
+						onPress: () => console.log('ShowProducts')
+						// onPress: () => navigation.navigate('ShowProducts')
 					}
 				],
 				{ cancelable: false }
 			)
-		}
+		})
+		.catch(function (error){
+			setLoading(true)
+			Alert.alert(
+				"Failed Send Data",
+				"Gagal Kirim Data, Hubungi IT Department",
+				[
+					{ 
+						text: "OK", 
+						onPress: () => console.log(error) 
+					}
+				],
+				{ cancelable: false }
+			)
+		})
 	}
 
 	const get_data = async() => {
@@ -119,9 +105,9 @@ const form_by_product = ({route, navigation}) => {
 			app_version: app_version,
 			sys_plant_id: sys_plant_id,
 			user_id: user_id,
-			eng_product_id: eng_product_id
+			secproc_planning_product_item_id: secproc_planning_product_item_id
 		}
-		Axios.get('http://192.168.131.121:3000/api/v2/secprocs/new?', {params: params, headers: headers})
+		Axios.get(`${base_url}/api/v2/secprocs/new?`, {params: params, headers: headers})
 		.then(response => {
 			setLoading(true)
       setData(response.data.data)
@@ -409,8 +395,6 @@ const form_by_product = ({route, navigation}) => {
 		}
 		return records
 	}
-
-	console.log(operator_process)
 
 	const loopingOperator = () => {
 		var record = []

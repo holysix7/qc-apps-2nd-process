@@ -9,6 +9,7 @@ import styles from '../Styles/Styling';
 import app_version from '../System/app_version';
 import app_name from '../System/app_name';
 import checklist from '../Assets/check.png';
+import base_url from '../System/base_url';
 
 const show_products = ({route, navigation}) => {
 	const {line_id, line_name, line_number, sys_plant_id, line_status, user_id} = route.params
@@ -27,13 +28,13 @@ const show_products = ({route, navigation}) => {
 		}
 		const params = {
 			tbl: 'planning_product',
-			// kind: 'by_machine',
-			sys_plant_id: sys_plant_id,
 			app_version: app_version,
+			sys_plant_id: sys_plant_id,
       user_id: user_id,
 			secproc_part_line_id: line_id,
 		}
-		axios.get('http://192.168.131.121:3000/api/v2/secprocs?', {params: params, headers: headers})
+		axios.get(`${base_url}/api/v2/secprocs?`, {params: params, headers: headers})
+		// axios.get('http://192.168.131.121:3000/api/v2/secprocs?', {params: params, headers: headers})
 		.then(response => {
 			setLoading(true)
       setRefreshing(false)
@@ -62,10 +63,11 @@ const show_products = ({route, navigation}) => {
     var records = []
     if(data.length > 0){
       data.map((val, key) => {
+				console.log(val.operator_status)
         records.push( 
           <View key={key} style={styles.contenDateProduct}>
             <Button style={styles.productsButtonRunning} onPress={() => navigation.navigate('FormByProduct', {
-              id_part: val.id,
+              secproc_planning_product_item_id: val.secproc_planning_product_item_id,
               secproc_planning_product_id: val.secproc_planning_product_id,
               eng_product_id: val.eng_product_id,
               product_name: val.product_name,
@@ -79,7 +81,7 @@ const show_products = ({route, navigation}) => {
               line_status: line_status
             })}>
               <View style={{flexDirection: 'row'}}>
-                <View style={{flexDirection: 'column'}}>
+                <View style={{flexDirection: 'column', flex: 1}}>
                   <Text style={styles.fontButtonHeader}> {val.product_customer_part_number} </Text>   
                   <Text style={styles.fontButtonFooter}> {val.product_name} </Text>   
                 </View>
@@ -88,7 +90,7 @@ const show_products = ({route, navigation}) => {
                 </View>
                 {
                   val.operator_status == 'Ready' ? 
-                  <View style={{flexDirection: 'column', justifyContent: 'center'}}>
+                  <View style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}}>
                     <Image source={operators} style={{width: 35, height: 35}} />
                   </View> :
                   null 

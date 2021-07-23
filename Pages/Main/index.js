@@ -14,6 +14,7 @@ import app_version from '../System/app_version';
 import app_name from '../System/app_name';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { forHorizontalIOS } from '@react-navigation/stack/lib/typescript/src/TransitionConfigs/CardStyleInterpolators';
+import base_url from '../System/base_url'
 
 const Main = ({navigation}) => {
   
@@ -51,7 +52,8 @@ const Main = ({navigation}) => {
       user_id: user_id,
       app_version: app_version
     }
-    axios.get('http://192.168.131.121:3000/api/v2/secprocs?', {params: params, headers: headers})
+    axios.get(`${base_url}/api/v2/secprocs?`, {params: params, headers: headers})
+    // axios.get('http://192.168.131.121:3000/api/v2/secprocs?', {params: params, headers: headers})
     .then(response => {
       setLoading(true)
       setData(response.data.data)
