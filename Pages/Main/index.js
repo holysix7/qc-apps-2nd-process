@@ -36,7 +36,6 @@ const Main = ({navigation}) => {
   }, [])
 
   const lines = async(value) => {
-    console.log(value)
     setCekId(value)
     setLoading(false)
     const token = await AsyncStorage.getItem("key")
@@ -296,53 +295,6 @@ const Main = ({navigation}) => {
     return records
   }
 
-  const loopFeature = () => {
-    const iqcData = []
-    featureUser.map((element, key) => {
-      if(cekId == element.sys_plant_id){
-        if(element.qc_incoming != null){
-          if(element.qc_incoming.view_permissions != false){
-            if(versionIQC == "0.9.6.5.A"){
-              iqcData.push(
-                <TouchableOpacity key={key} style={{borderWidth: 1, borderRadius: 15, borderColor: 'white', width: 80, paddingVertical: 3, marginTop: 5, flexDirection: 'column', alignItems: 'center'}} onPress={() => {
-                  navigation.navigate('IQC', {
-                    sys_plant_id: cekId,
-                    qc_incoming: element.qc_incoming
-                  })
-                }}>
-                  <Image source={Cog} style={styles.cogButton}/>
-                  <Text style={{fontWeight: 'bold', fontSize: 11, color: 'white'}}>IQC</Text>
-                </TouchableOpacity>
-              )
-            }else{
-              iqcData.push(
-                <TouchableOpacity key={key} style={{borderWidth: 1, borderRadius: 15, borderColor: 'white', width: 80, paddingVertical: 3, marginTop: 5, flexDirection: 'column', alignItems: 'center'}} onPress={() => Alert.alert(
-                  "Info",
-                  "Silahkan Hubungi IT Karena Versi Yang Digunakan Tidak Sesuai",
-                  [
-                    { text: "OK", onPress: () => console.log('User Tidak Punya Akses') }
-                  ],
-                  { cancelable: false }
-                )}>
-                  <Image source={Cog} style={styles.cogButton}/>
-                  <Text style={{fontWeight: 'bold', fontSize: 11, color: 'white'}}>IQC</Text>
-                </TouchableOpacity>
-              )
-            }
-          }else{
-            iqcData.push(
-              <TouchableOpacity key={key} style={{borderWidth: 1, borderRadius: 15, borderColor: 'white', width: 80, paddingVertical: 3, marginTop: 5, flexDirection: 'column', alignItems: 'center'}} onPress={() => alert('Maaf Anda Tidak Memiliki Hak Akses Inprocess QC')}>
-                <Image source={Cog} style={styles.cogButton}/>
-                <Text style={{fontWeight: 'bold', fontSize: 11, color: 'white'}}>IQC</Text>
-              </TouchableOpacity>
-            )
-          }
-        }
-      }
-    })
-    return iqcData
-  }
-
   const buttonNavbar = () => {
     return (
       <View style={styles.bottomNavbar}>
@@ -350,9 +302,7 @@ const Main = ({navigation}) => {
           <Image source={Home} style={styles.homeButton}/>
         </Button>
         {/* </Button> */}
-      
-        {loopFeature()}
-        
+
         <Button style={styles.buttonNavbar} onPress={() => {
           navigation.navigate('Profile', {
             name: name,

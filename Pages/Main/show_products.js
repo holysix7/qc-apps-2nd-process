@@ -33,13 +33,12 @@ const show_products = ({route, navigation}) => {
       user_id: user_id,
 			secproc_part_line_id: line_id,
 		}
-		axios.get(`${base_url}/api/v2/secprocs?`, {params: params, headers: headers})
-		// axios.get('http://192.168.131.121:3000/api/v2/secprocs?', {params: params, headers: headers})
+		// axios.get(`${base_url}/api/v2/secprocs?`, {params: params, headers: headers})
+		axios.get('http://192.168.131.121:3000/api/v2/secprocs?', {params: params, headers: headers})
 		.then(response => {
 			setLoading(true)
       setRefreshing(false)
 			setData(response.data.data)
-			console.log(response.data.data)
 			console.log("Products List Data: ", response.data.status, response.data.message)
 		})
 		.catch(error => console.log(error))
@@ -63,44 +62,113 @@ const show_products = ({route, navigation}) => {
     var records = []
     if(data.length > 0){
       data.map((val, key) => {
-				console.log(val.operator_status)
-        records.push( 
-          <View key={key} style={styles.contenDateProduct}>
-            <Button style={styles.productsButtonRunning} onPress={() => navigation.navigate('FormByProduct', {
-              secproc_planning_product_item_id: val.secproc_planning_product_item_id,
-              secproc_planning_product_id: val.secproc_planning_product_id,
-              eng_product_id: val.eng_product_id,
-              product_name: val.product_name,
-              product_internal_part_id: val.product_internal_part_id,
-              product_customer_part_number: val.product_customer_part_number,
-              quantity: val.quantity,
-              mkt_customer_name: val.mkt_customer_name,
-              product_model: val.product_model,
-              sys_plant_id: sys_plant_id,
-              line_name: line_name,
-              line_status: line_status
-            })}>
-              <View style={{flexDirection: 'row'}}>
-                <View style={{flexDirection: 'column', flex: 1}}>
-                  <Text style={styles.fontButtonHeader}> {val.product_customer_part_number} </Text>   
-                  <Text style={styles.fontButtonFooter}> {val.product_name} </Text>   
-                </View>
-                <View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
-                  <Text style={styles.fontButtonFooter}> {val.product_internal_part_id} </Text>   
-                </View>
-                {
-                  val.operator_status == 'Ready' ? 
-                  <View style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}}>
-                    <Image source={operators} style={{width: 35, height: 35}} />
-                  </View> :
-                  null 
-                }
-              </View>
-            </Button>
-          </View>
-        )
+				console.log(val.next_screen)
+				if(val.next_screen == 'leader_form'){
+					records.push( 
+						<View key={key} style={styles.contenDateProduct}>
+							<Button style={styles.productsButtonRunning} onPress={() => navigation.navigate('LeaderForm', {
+								secproc_planning_product_item_id: val.secproc_planning_product_item_id,
+								secproc_planning_product_id: val.secproc_planning_product_id,
+								eng_product_id: val.eng_product_id,
+								product_name: val.product_name,
+								product_internal_part_id: val.product_internal_part_id,
+								product_customer_part_number: val.product_customer_part_number,
+								quantity: val.quantity,
+								mkt_customer_name: val.mkt_customer_name,
+								product_model: val.product_model,
+								sys_plant_id: sys_plant_id,
+								line_name: line_name,
+								line_status: line_status
+							})}>
+								<View style={{flexDirection: 'row'}}>
+									<View style={{flexDirection: 'column', flex: 1}}>
+										<Text style={styles.fontButtonHeader}> {val.product_customer_part_number} </Text>   
+										<Text style={styles.fontButtonFooter}> {val.product_name} </Text>   
+									</View>
+									<View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
+										<Text style={styles.fontButtonFooter}> {val.product_internal_part_id} </Text>   
+									</View>
+									{
+										val.operator_status == 'Ready' ? 
+										<View style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}}>
+											<Image source={operators} style={{width: 35, height: 35}} />
+										</View> :
+										null 
+									}
+								</View>
+							</Button>
+						</View>
+					)
+				}else if(val.next_screen == 'qc_form'){
+					records.push( 
+						<View key={key} style={styles.contenDateProduct}>
+							<Button style={styles.productsButtonRunning} onPress={() => navigation.navigate('QCForm', {
+								secproc_planning_product_item_id: val.secproc_planning_product_item_id,
+								secproc_planning_product_id: val.secproc_planning_product_id,
+								eng_product_id: val.eng_product_id,
+								product_name: val.product_name,
+								product_internal_part_id: val.product_internal_part_id,
+								product_customer_part_number: val.product_customer_part_number,
+								quantity: val.quantity,
+								mkt_customer_name: val.mkt_customer_name,
+								product_model: val.product_model,
+								sys_plant_id: sys_plant_id,
+								line_name: line_name,
+								line_status: line_status
+							})}>
+								<View style={{flexDirection: 'row'}}>
+									<View style={{flexDirection: 'column', flex: 1}}>
+										<Text style={styles.fontButtonHeader}> {val.product_customer_part_number} </Text>   
+										<Text style={styles.fontButtonFooter}> {val.product_name} </Text>   
+									</View>
+									<View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
+										<Text style={styles.fontButtonFooter}> {val.product_internal_part_id} </Text>   
+									</View>
+									{
+										val.operator_status == 'Ready' ? 
+										<View style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}}>
+											<Image source={operators} style={{width: 35, height: 35}} />
+										</View> :
+										null 
+									}
+								</View>
+							</Button>
+						</View>
+					)
+				}else{
+					records.push( 
+						<View key={key} style={styles.contenDateProduct}>
+							<Button style={styles.productsButtonRunning} onPress={() => alert('Maaf anda tidak memiliki akses')}>
+								<View style={{flexDirection: 'row'}}>
+									<View style={{flexDirection: 'column', flex: 1}}>
+										<Text style={styles.fontButtonHeader}> {val.product_customer_part_number} </Text>   
+										<Text style={styles.fontButtonFooter}> {val.product_name} </Text>   
+									</View>
+									<View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
+										<Text style={styles.fontButtonFooter}> {val.product_internal_part_id} </Text>   
+									</View>
+									{
+										val.operator_status == 'Ready' ? 
+										<View style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}}>
+											<Image source={operators} style={{width: 35, height: 35}} />
+										</View> :
+										null 
+									}
+								</View>
+							</Button>
+						</View>
+					)
+				}
       })
-    }
+    }else{
+			records.push(
+				<View key={'wkwkw'} style={{width: '100%', padding: 25, flexDirection: 'row', justifyContent: 'center'}}>
+					<View style={{justifyContent: 'center', height: 200, padding: 10, borderRadius: 10, backgroundColor: '#F3F2C9'}}>
+						<Text style={{textAlign: 'justify', color: 'grey'}}>Tidak ada data part di {line_name}</Text>
+					</View>
+				</View>
+			)
+		}
     return records
   }
 
@@ -117,6 +185,13 @@ const show_products = ({route, navigation}) => {
 				<ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
 				{loading ? contentData() : null}
 				</ScrollView>
+			</View>
+			<View style={{width: '100%', padding: 25, flexDirection: 'row', justifyContent: 'center', backgroundColor: '#dfe0df'}}>
+				{loading ? 
+				<Button style={{justifyContent: 'center', backgroundColor: '#1a508b', borderRadius: 15, flex: 1}} onPress={() => alert('Laporan Rework Under Maintenance')}>
+					<Text>Laporan Rework Product Lot Out</Text>
+				</Button> : 
+				null}
 			</View>
 		</Container>
 	)

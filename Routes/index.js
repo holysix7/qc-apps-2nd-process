@@ -6,7 +6,8 @@ import {
   Login,
 	Main,
 	ShowProducts,
-	FormByProduct
+	LeaderForm,
+	QCForm
 } from '../Pages'
 
 const Stack = createStackNavigator();
@@ -25,7 +26,8 @@ const Routes = () => {
 			<Stack.Screen name="Login" component={Login} />
 			<Stack.Screen name="Main" component={Main} />
 			<Stack.Screen name="ShowProducts" component={ShowProducts} />
-			<Stack.Screen name="FormByProduct" component={FormByProduct} />
+			<Stack.Screen name="LeaderForm" component={LeaderForm} />
+			<Stack.Screen name="QCForm" component={QCForm} />
 
     </Stack.Navigator>  
   )

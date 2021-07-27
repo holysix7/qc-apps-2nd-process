@@ -8,7 +8,7 @@ import moment from 'moment';
 import app_version from	'../../System/app_version';
 import base_url from	'../../System/base_url';
 
-const form_by_product = ({route, navigation}) => {
+const qc_form = ({route, navigation}) => {
   const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name} = route.params
 	useEffect(() => {
 		get_data()
@@ -431,7 +431,7 @@ const form_by_product = ({route, navigation}) => {
 
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', borderTopWidth: 0.3, borderRightWidth: 0.3, padding: 15, justifyContent: 'center', alignItems: 'center', width: "50%", backgroundColor: '#dfe0df'}}>
-								<Text style={{marginTop: 1, fontWeight: 'bold', fontSize: 17}}>Form Data Operator</Text>
+								<Text style={{marginTop: 1, fontWeight: 'bold', fontSize: 17}}>Form Check Sheet</Text>
 							</View>
 							<View style={{flexDirection: 'column', flex: 1}}>
 								<View style={{flexDirection: 'row', borderTopWidth: 0.3, height: 40, justifyContent: 'center', alignItems: 'center'}}>
@@ -482,4 +482,4 @@ const form_by_product = ({route, navigation}) => {
 	)
 }
 
-export default form_by_product;
+export default qc_form;

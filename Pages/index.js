@@ -6,7 +6,8 @@ import BoardingScreen from './Auth/BoardingScreen';
 import Login from './Auth/Login';
 import Main from './Main';
 import ShowProducts from './Main/show_products';
-import FormByProduct from './Main/Form/form_by_product';
+import LeaderForm from './Main/Form/leader_form';
+import QCForm from './Main/Form/qc_form';
 
 export {
   SplashScreen,
@@ -14,5 +15,6 @@ export {
   Login,
   Main,
   ShowProducts,
-  FormByProduct
+  LeaderForm,
+  QCForm
 }
