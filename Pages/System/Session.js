@@ -14,7 +14,7 @@ const Session = async(data) => {
         ['duty_plant_option_select', JSON.stringify(data.duty_plant_option_select)], 
         ['feature', JSON.stringify(data.feature)]
     ]
-    console.log(item)
+    // console.log(item)
     try {
         await AsyncStorage.multiSet(item)
     } catch (error) {

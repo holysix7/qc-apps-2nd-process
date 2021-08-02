@@ -33,8 +33,8 @@ const show_products = ({route, navigation}) => {
       user_id: user_id,
 			secproc_part_line_id: line_id,
 		}
-		// axios.get(`${base_url}/api/v2/secprocs?`, {params: params, headers: headers})
-		axios.get('http://192.168.131.121:3000/api/v2/secprocs?', {params: params, headers: headers})
+		axios.get(`${base_url}/api/v2/secprocs?`, {params: params, headers: headers})
+		// axios.get('http://192.168.131.121:3000/api/v2/secprocs?', {params: params, headers: headers})
 		.then(response => {
 			setLoading(true)
       setRefreshing(false)

@@ -2,6 +2,7 @@ import {Image, View, TextInput, TouchableWithoutFeedback, Keyboard, KeyboardAvoi
 import React, {useEffect, useState} from 'react';
 import { Container, Text, Button, Picker } from 'native-base';
 import LogoSIP from '../../Assets/logo-sip370x50.png';
+import cameraicon from '../../Assets/cameraicon.png';
 import AsyncStorage from "@react-native-community/async-storage";
 import Axios from 'axios';
 import moment from 'moment';
@@ -15,17 +16,29 @@ const qc_form = ({route, navigation}) => {
 	}, [])
 	const [user_name, setUserName] 	      				= useState(null)
 	const [simpan_button, setSimpanButton] 	      = useState(null)
+	const [image_button, setImageButton] 	      	= useState(true)
 	const [data, setData] 	              				= useState(null)
-	const [mold_condition, setCondition] 					= useState(null)
+	const [shift, setShift] 											= useState(1)
+	/**
+	 * Parameters
+	 */
+	const [judgement_1st_piece, setJudgement] 		= useState(null)
+	const [output_process, setOutputProcess] 			= useState('0')
+	const [appearance_pn, setAppearancePN] 				= useState('0')
+	const [check_packing, setCheckPacking] 				= useState(null)
+	const [check_label, setCheckLabel] 						= useState(null)
+	const [final_judgement, setFinalJudgement] 		= useState(null)
+
 	const [loading, setLoading] 									= useState(false)
 	const [neeple_cooling, setCooling] 						= useState(null)
 	const [standard_part, setStandard] 						= useState(null)
 	const [data_categories, setCategories]				= useState(null)
-	const [operator_process, setOperatorProcess]	= useState([])
-	const [total_process, setTotalProcess]				= useState([])
-	const [created_by, setCreatedBy]		  				= useState("")
-	const [updated_by, setUpdatedBy]		  				= useState("")
-	const [tooling, setTooling]		  							= useState(null)
+	const [array_categories, newArrayCategories]	= useState([])
+	const [object_categories, setObjectCategories]= useState(null)
+	const [ng_details, setNGDetails]							= useState([])
+	const [category_processes, setCategoryProcesses]				= useState([])
+	const [created_by, setCreatedBy]		  				= useState(null)
+	const [updated_by, setUpdatedBy]		  				= useState(null)
 	const [planningId, setPlanningId]		  				= useState("")
 	let date 																			= moment().format("YYYY-MM-DD")
 	let created_at 																= moment().format("YYYY-MM-DD HH:mm:ss")
@@ -42,7 +55,7 @@ const qc_form = ({route, navigation}) => {
 			app_version: app_version,
 			user_id: user_id,
 			secproc_planning_product_item_id: secproc_planning_product_item_id,
-			operator_process: operator_process,
+			ng_details: ng_details,
 			sys_plant_id: sys_plant_id
 		}
 		console.log(body)
@@ -101,16 +114,30 @@ const qc_form = ({route, navigation}) => {
 			'Authorization': token
 		}
 		const params = {
-			tbl: 'planning_pic_product',
+			tbl: 'daily_inspection',
 			app_version: app_version,
 			sys_plant_id: sys_plant_id,
 			user_id: user_id,
-			secproc_planning_product_item_id: secproc_planning_product_item_id
+			secproc_planning_product_item_id: secproc_planning_product_item_id,
+			shift: shift
 		}
+		// console.log(params)
 		Axios.get(`${base_url}/api/v2/secprocs/new?`, {params: params, headers: headers})
+		// Axios.get('http://192.168.131.121:3000/api/v2/secprocs/new?', {params: params, headers: headers})
 		.then(response => {
 			setLoading(true)
       setData(response.data.data)
+      setCategories({id: response.data.data.category_processes[0].category_process_id, name: response.data.data.category_processes[0].category_process_name})
+			setObjectCategories({id: null, name: null, status: 'Non-Active'})
+			var array_kosong = []
+			response.data.data.category_processes.map((v, k) => {
+				array_kosong.push({
+					id: v.category_process_id,
+					name: v.category_process_name,
+					status: 'Non-Active'
+				})
+			})
+			newArrayCategories(array_kosong)
 			console.log(response.data.status)
 		})
 		.catch(error => {
@@ -118,23 +145,115 @@ const qc_form = ({route, navigation}) => {
 		})
 	}
 
+	const update_params_judgement = (val) => {
+		if(val == 'NG'){
+			if(appearance_pn > 0 || check_packing == 'NG' || check_label == 'NG'){
+				setFinalJudgement('NG')
+				setJudgement(val)
+				console.log('final harus NG')
+			}else{
+				setFinalJudgement('OK')
+				setJudgement(val)
+				console.log('final harus OK')
+			}
+		}else{
+			if(appearance_pn > 0 || check_packing == 'NG' || check_label == 'NG'){
+				setFinalJudgement('NG')
+				setJudgement(val)
+				console.log('final harus NG')
+			}else{
+				setFinalJudgement('OK')
+				setJudgement(val)
+				console.log('final harus OK')
+			}
+		}
+	}
+
+	const update_params_packing = (val) => {
+		if(val == 'NG'){
+			if(judgement_1st_piece == 'NG' || appearance_pn > 0 || check_label == 'NG' || val == 'NG'){
+				console.log('final harus NG')
+				setFinalJudgement('NG')
+				setCheckPacking(val)
+			}else{
+				setFinalJudgement('OK')
+				console.log('final harus OK')
+				setCheckPacking(val)
+			}
+		}else{
+			if(judgement_1st_piece == 'NG' || appearance_pn > 0 || check_label == 'NG' || val == 'NG'){
+				console.log('final harus NG')
+				setFinalJudgement('NG')
+				setCheckPacking(val)
+			}else{
+				setFinalJudgement('OK')
+				console.log('final harus OK')
+				setCheckPacking(val)
+			}
+		}
+	}
+
+	const update_params_label = (val) => {
+		if(val == 'NG'){
+			if(judgement_1st_piece == 'NG' || appearance_pn > 0 || check_packing == 'NG' || val == 'NG'){
+				console.log('final harus NG')
+				setFinalJudgement('NG')
+				setCheckLabel(val)
+			}else{
+				setFinalJudgement('OK')
+				console.log('final harus OK')
+				etCheckLabel(val)
+			}
+		}else{
+			if(judgement_1st_piece == 'NG' || appearance_pn > 0 || check_packing == 'NG' || val == 'NG'){
+				console.log('final harus NG')
+				setFinalJudgement('NG')
+				setCheckLabel(val)
+			}else{
+				setFinalJudgement('OK')
+				console.log('final harus OK')
+				setCheckLabel(val)
+			}
+		}
+	}
+
+	const setPnFunction = (val) => {
+		setAppearancePN(val)
+		if(parseInt(val) > 0){
+			if(judgement_1st_piece == 'NG' || check_packing == 'NG' || check_label == 'NG' || val > 0){
+				console.log('final harus NG')
+				setFinalJudgement('NG')
+			}else{
+				setFinalJudgement('OK')
+				console.log('final harus OK')
+			}
+		}else{
+			if(judgement_1st_piece == 'NG' || check_packing == 'NG' || check_label == 'NG' || val > 0){
+				console.log('final harus NG')
+				setFinalJudgement('NG')
+			}else{
+				setFinalJudgement('OK')
+				console.log('final harus OK')
+			}
+		}
+	}
+
 	const content = () => {
-		var form = []
 		var category_process = []
 		if(data != null){
-			if(data.category_process_by_product.length > 0){
-				data.category_process_by_product.map((val, key) => {
+			if(data.category_processes.length > 0){
+				data.category_processes.map((val, key) => {
 					category_process.push(
-						<View key={key} style={{flexDirection: 'row', marginTop: 5, borderWidth: 0.3, marginHorizontal: 2, paddingHorizontal: 5}}>
-							<TouchableOpacity style={{flexDirection: 'column', height: 50, justifyContent: 'center'}} onPress={() => setCategories({id: val.id, name: val.name})}>
-								<Text>{val.name}</Text>
+						<View key={key} style={{flexDirection: 'column', marginTop: 5, borderWidth: 0.3, marginHorizontal: 2, paddingHorizontal: 5}}>
+							<TouchableOpacity style={{flexDirection: 'column', height: 50, justifyContent: 'center'}} onPress={() => setCategories({id: val.category_process_id, name: val.category_process_name})}>
+								<Text>{val.category_process_name}</Text>
 							</TouchableOpacity>
 						</View>
 					)
 				})
 			}else{
 				category_process.push(
-					<View key={'category_process'} style={{flexDirection: 'row', marginTop: 10}}>
+					<View key={'category_process'} style={{flexDirection: 'column', marginTop: 10, justifyContent: 'center'}}>
 						<View style={{flexDirection: 'column', justifyContent: 'center', height: 120, padding: 10, borderRadius: 10, backgroundColor: '#F3F2C9'}}>
 							<Text style={{textAlign: 'justify', color: 'grey'}}>Gagal Memanggil Data Category Process</Text>
 						</View>
@@ -143,16 +262,127 @@ const qc_form = ({route, navigation}) => {
 			}
 		}
 		return (
-			<View key={'content'} style={{flexDirection: 'column'}}>
+			<ScrollView key={'content'} style={{flexDirection: 'column'}}>
+
+				<View style={{flexDirection: 'row', marginTop: 15, borderTopWidth: 0.3}}>
+					<View style={{flexDirection: 'column', padding: 7, width: '40%'}}>
+						<Text>Judgement 1st Piece</Text>
+					</View>
+					<View style={{flexDirection: 'column', padding: 7, paddingTop: 15}}>
+						<Text>:</Text>
+					</View>
+					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+						<Picker
+							selectedValue={judgement_1st_piece}
+							onValueChange={(value) => update_params_judgement(value)}
+						>					
+							<Picker.Item label={'Pilih'} value={null} />
+							<Picker.Item label={'OK'} value={'OK'} />
+							<Picker.Item label={'NG'} value={'NG'} />
+						</Picker>
+					</View>
+				</View>
+
+				<View style={{flexDirection: 'row', marginTop: 15}}>
+					<View style={{flexDirection: 'column', padding: 7, width: '40%'}}>
+						<Text>Output Process</Text>
+					</View>
+					<View style={{flexDirection: 'column', padding: 7}}>
+						<Text>:</Text>
+					</View>
+					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+						<TextInput style={{color: 'black', fontSize: 13}} value={output_process} onChangeText={(value) => setOutputProcess(value)} keyboardType='number-pad' />
+					</View>
+				</View>
+
+				<View style={{flexDirection: 'row', marginTop: 15}}>
+					<View style={{flexDirection: 'column', padding: 7, marginTop: 25, width: '40%'}}>
+						<Text>Check Appearance</Text>
+					</View>
+					<View style={{flexDirection: 'column', padding: 7, marginTop: 25}}>
+						<Text>:</Text>
+					</View>
+					<View style={{flexDirection: 'column', padding: 7}}>
+						<View style={{flexDirection: 'row', marginTop: 8}}>
+							<Text>PN</Text>
+						</View>
+						<View style={{flexDirection: 'row', marginTop: 18}}>
+							<Text>N</Text>
+						</View>
+					</View>
+
+					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', paddingLeft: 5, flex: 1}}>
+						<View style={{flexDirection: 'row', height: 40, borderWidth: 1, borderRadius: 5}}>
+							<TextInput style={{color: 'black', fontSize: 13}} value={appearance_pn} onChangeText={(value) => setPnFunction(value)} keyboardType='number-pad' />
+						</View>
+						<View style={{flexDirection: 'row', alignItems: 'center', height: 40, borderWidth: 1, borderRadius: 5, marginTop: 5, backgroundColor: '#b8b8b8'}}>
+							<Text style={{fontSize: 13}}>{data != null ? data.appearance_n != null ? data.appearance_n : 'appearance_n nya dong' : '-' }</Text>
+						</View>
+					</View>
+				</View>
+
+				<View style={{flexDirection: 'row', marginTop: 15}}>
+					<View style={{flexDirection: 'column', padding: 7, width: '40%'}}>
+						<Text>Check Packing</Text>
+					</View>
+					<View style={{flexDirection: 'column', padding: 7, paddingTop: 15}}>
+						<Text>:</Text>
+					</View>
+					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+						<Picker
+							selectedValue={check_packing}
+							onValueChange={(value) => update_params_packing(value)}
+						>					
+							<Picker.Item label={'Pilih'} value={null} />
+							<Picker.Item label={'OK'} value={'OK'} />
+							<Picker.Item label={'NG'} value={'NG'} />
+						</Picker>
+					</View>
+				</View>
+
+				<View style={{flexDirection: 'row', marginTop: 15}}>
+					<View style={{flexDirection: 'column', padding: 7, width: '40%'}}>
+						<Text>Check Label</Text>
+					</View>
+					<View style={{flexDirection: 'column', padding: 7, paddingTop: 15}}>
+						<Text>:</Text>
+					</View>
+					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+						<Picker
+							selectedValue={check_label}
+							onValueChange={(value) => update_params_label(value)}
+						>					
+							<Picker.Item label={'Pilih'} value={null} />
+							<Picker.Item label={'OK'} value={'OK'} />
+							<Picker.Item label={'NG'} value={'NG'} />
+						</Picker>
+					</View>
+				</View>
+
+				<View style={{flexDirection: 'row', marginTop: 15}}>
+					<View style={{flexDirection: 'column', padding: 7, width: '40%'}}>
+						<Text>Final Judgment</Text>
+					</View>
+					<View style={{flexDirection: 'column', padding: 7, paddingTop: 15}}>
+						<Text>:</Text>
+					</View>
+					<View style={{flexDirection: 'column', backgroundColor: '#b8b8b8', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+						<Text>{final_judgement != null ? final_judgement : '-'}</Text>
+					</View>
+				</View>
+				
 				<View style={{flexDirection: 'row', marginTop: 15, borderTopWidth: 0.3}}>
 					<View style={{flexDirection: 'column', alignItems: 'center', flex: 1}}>
 						<Text style={{fontWeight: 'bold'}}>Category Process</Text>
 					</View>
 				</View>
+
 				<View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
 					{category_process}
 				</View>
-			</View>
+
+				{funcContent()}
+			</ScrollView>
 		)
 	}
 
@@ -161,6 +391,7 @@ const qc_form = ({route, navigation}) => {
 			if(data_categories.id == 1){
 				return (
 					<ScrollView>
+
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Category Process</Text>
@@ -174,6 +405,7 @@ const qc_form = ({route, navigation}) => {
 								</View>
 							</View>
 						</View>
+
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Leader Produksi</Text>
@@ -183,16 +415,26 @@ const qc_form = ({route, navigation}) => {
 							</View>
 							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
 								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{user_name.substring(5, 1000)}</Text>
+									<Text style={{fontSize: 14}}>{data != null ? data.leader_name : '-'}</Text>
 								</View>
 							</View>
 						</View>
 
-						<View style={{flexDirection: 'row', justifyContent: 'center'}}>
-							<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkOperator(data_categories)}><Text>Tambah Operator {data_categories.name}</Text></Button>
+						{listOperator()}
+						
+						<View style={{flexDirection: 'row', justifyContent: 'center', borderBottomWidth: 0.3}}>
+							<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
 						</View>
 
-						{listOperator()}
+						{list_ng_category()}
+
+						{/* {
+							image_button ?  */}
+							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
+								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetailsImage(data_categories)}><Text>Tambah Foto</Text></Button>
+							</View> 
+
+						{image_category()}
 
 						{
 							simpan_button ? 
@@ -202,11 +444,13 @@ const qc_form = ({route, navigation}) => {
 							null
 						}
 
+
 					</ScrollView>
 				)
 			}else if(data_categories.id == 2){
 				return (
 					<ScrollView>
+
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Category Process</Text>
@@ -220,6 +464,7 @@ const qc_form = ({route, navigation}) => {
 								</View>
 							</View>
 						</View>
+
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Leader Produksi</Text>
@@ -229,15 +474,27 @@ const qc_form = ({route, navigation}) => {
 							</View>
 							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
 								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{user_name.substring(5, 1000)}</Text>
+									<Text style={{fontSize: 14}}>{data != null ? data.leader_name : '-'}</Text>
 								</View>
 							</View>
 						</View>
-						<View style={{flexDirection: 'row', justifyContent: 'center'}}>
-							<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkOperator(data_categories)}><Text>Tambah Operator {data_categories.name}</Text></Button>
-						</View>
 
 						{listOperator()}
+						
+						<View style={{flexDirection: 'row', justifyContent: 'center', borderBottomWidth: 0.3}}>
+							<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
+						</View>
+
+						{list_ng_category()}
+
+						{/* {
+							image_button ?  */}
+							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
+								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetailsImage(data_categories)}><Text>Tambah Foto</Text></Button>
+							</View> 
+
+						{image_category()}
+
 
 						{
 							simpan_button ? 
@@ -252,6 +509,7 @@ const qc_form = ({route, navigation}) => {
 			}else if(data_categories.id == 3){
 				return (
 					<ScrollView>
+
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Category Process</Text>
@@ -265,6 +523,7 @@ const qc_form = ({route, navigation}) => {
 								</View>
 							</View>
 						</View>
+
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Leader Produksi</Text>
@@ -274,15 +533,28 @@ const qc_form = ({route, navigation}) => {
 							</View>
 							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
 								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{user_name.substring(5, 1000)}</Text>
+									<Text style={{fontSize: 14}}>{data != null ? data.leader_name : '-'}</Text>
 								</View>
 							</View>
 						</View>
-						<View style={{flexDirection: 'row', justifyContent: 'center'}}>
-							<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkOperator(data_categories)}><Text>Tambah Operator {data_categories.name}</Text></Button>
-						</View>
 						
 						{listOperator()}
+						
+						<View style={{flexDirection: 'row', justifyContent: 'center', borderBottomWidth: 0.3}}>
+							<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
+						</View>
+
+						{list_ng_category()}
+
+						{/* {
+							image_button ?  */}
+							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
+								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetailsImage(data_categories)}><Text>Tambah Foto</Text></Button>
+							</View> 
+
+						{image_category()}
+
+						
 
 						{
 							simpan_button ? 
@@ -297,6 +569,7 @@ const qc_form = ({route, navigation}) => {
 			}else if(data_categories.id == 4){
 				return (
 					<ScrollView>
+
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Category Process</Text>
@@ -310,6 +583,7 @@ const qc_form = ({route, navigation}) => {
 								</View>
 							</View>
 						</View>
+
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Leader Produksi</Text>
@@ -319,15 +593,28 @@ const qc_form = ({route, navigation}) => {
 							</View>
 							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
 								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{user_name.substring(5, 1000)}</Text>
+									<Text style={{fontSize: 14}}>{data != null ? data.leader_name : '-'}</Text>
 								</View>
 							</View>
 						</View>
-						<View style={{flexDirection: 'row', justifyContent: 'center'}}>
-							<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkOperator(data_categories)}><Text>Tambah Operator {data_categories.name}</Text></Button>
-						</View>
 						
 						{listOperator()}
+						
+						<View style={{flexDirection: 'row', justifyContent: 'center', borderBottomWidth: 0.3}}>
+							<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
+						</View>
+
+						{list_ng_category()}
+
+						{/* {
+							image_button ?  */}
+							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
+								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetailsImage(data_categories)}><Text>Tambah Foto</Text></Button>
+							</View> 
+
+						{image_category()}
+
+						
 
 						{
 							simpan_button ? 
@@ -339,53 +626,110 @@ const qc_form = ({route, navigation}) => {
 
 					</ScrollView>
 				)
-			}else{
-				
 			}
 		}
 	}
 
-	const checkOperator = (value) => {
-		setSimpanButton(true)
-		setTotalProcess([...total_process, {
-			id: total_process.length + 1,
-			category_process_id: value.id,
-			name: value.name
-		}])
-		setOperatorProcess([...operator_process, {
-			id: operator_process.length + 1,
-			category_process_id: value.id,
-			category_process_name: value.name,
-			hrd_employee_id: 0
-		}])
-	}
-	
 	const listOperator = () => {
 		var records = []
+		if(data != null){
+			if(data.category_processes.length > 0){
+				data.category_processes.map((value, key) => {
+					if(value.operator_lists.length > 0){
+						value.operator_lists.map((v, k) => {
+							if(data_categories.id == value.category_process_id){
+								if(value.operator_lists.length <= 1){
+									records.push(
+										<View key={k} style={{flexDirection: 'row'}}>
+											<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
+												<Text style={{fontSize: 15}}>Nama Operator </Text>
+											</View>
+											<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
+												<Text>:</Text>
+											</View>
+											<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
+												<View style={{borderWidth: 1, borderRadius: 5, backgroundColor: '#b8b8b8', height: 40, justifyContent: 'center', paddingLeft: 5}}>
+													<Text>{v.operator_name}</Text>
+												</View>
+											</View>
+										</View>
+									)
+								}else{
+									records.push(
+										<View key={k} style={{flexDirection: 'row'}}>
+											<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
+												<Text style={{fontSize: 15}}>Nama Operator {k+1} </Text>
+											</View>
+											<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
+												<Text>:</Text>
+											</View>
+											<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
+												<View style={{borderWidth: 1, borderRadius: 5, backgroundColor: '#b8b8b8', height: 40, justifyContent: 'center', paddingLeft: 5}}>
+													<Text>{v.operator_name}</Text>
+												</View>
+											</View>
+										</View>
+									)
+								}
+							}
+						})
+					}
+				})
+			}
+		}
+		return records
+	}
+
+	const checkNGDetails = (value) => {
+		setSimpanButton(true)
+		setNGDetails([...ng_details, {
+			id: ng_details.length + 1,
+			category_process_id: value.id,
+			ng_category_id: 0,
+			ng_quantity: '0'
+		}])
+	}
+
+	const checkNGDetailsImage = (value) => {
+		setImageButton(false)
+		setCategoryProcesses([...category_processes, {
+			id: category_processes.length + 1,
+			category_process_id: value.id,
+			name: value.name,
+			img_base64_full: null
+		}])
+	}
+	console.log(category_processes)
+
+	const list_ng_category = () => {
+		var records = []
 		var iterasi = 1
-		if(operator_process.length > 0 && total_process.length > 0){
-			operator_process.map((value, key) => {
-				data.category_process_by_product.map((element, index) => {
-					if(value.category_process_id == element.id && value.category_process_id == data_categories.id){
+		if(ng_details.length > 0){
+			ng_details.map((value, key) => {
+				data.category_processes.map((element, index) => {
+					if(value.category_process_id == element.category_process_id && value.category_process_id == data_categories.id){
 						records.push(
 							<View key={key} style={{paddingTop: 20, flexDirection: 'row'}}>
-								<View style={{padding: 4, width: '10%'}}>
-									<View style={{borderWidth: 0.5, borderRadius: 5, height: 40, justifyContent: 'center', paddingLeft: 5}}>
-										<Text style={{fontSize: 15}}> {iterasi++} </Text>
-									</View>
+								<View style={{flexDirection: 'column', margin: 7, width: '10%', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 10, borderRadius: 5}}>
+									<Text style={{fontSize: 15}}> {iterasi++} </Text>
 								</View>
-								<View style={{padding: 4, flex: 1}}>
-									<View style={{borderWidth: 0.5, borderRadius: 5, height: 40, justifyContent: 'center', paddingLeft: 5}}>
+								<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, flex: 1}}>
+									<View style={{borderWidth: 1, borderRadius: 5, height: 40, justifyContent: 'center', paddingLeft: 5}}>
 										<Picker 
 										mode="dropdown"
-										selectedValue={operator_process[key].hrd_employee_id}
-										onValueChange={(value) => fillOperatorData(value, key)}
+										selectedValue={ng_details[key].ng_category_id}
+										onValueChange={(value) => fillNGCategory(value, key, 'category_id')}
 										itemStyle={{marginLeft: 0}}
 										itemTextStyle={{fontSize: 9}}
 										>
-											{loopingOperator()}
+											{/* {loopingOperator()} */}
+											<Picker.Item label='Pilih' value='0' />
+											<Picker.Item label='Ancur Cuk' value='1' />
 										</Picker>
 									</View>
+								</View>
+								<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, width: '30%'}}>
+									<TextInput style={{color: 'black', fontSize: 13}} value={ng_details[key].ng_quantity} onChangeText={(value) => fillNGCategory(value, key, 'qty')} keyboardType='number-pad' />
 								</View>
 							</View>	
 						)
@@ -396,27 +740,45 @@ const qc_form = ({route, navigation}) => {
 		return records
 	}
 
-	const loopingOperator = () => {
-		var record = []
-		if(data != null){
-			if(data.operator_list.length > 0){
-				record.push(
-					<Picker.Item key={'itemChild'} label={'Pilih'} value={0} />
-				)
-				data.operator_list.map((val, key) => {
-					record.push(
-						<Picker.Item key={key} label={val.nik + ' | ' + val.name} value={val.id} />
-					)
+	const image_category = () => {
+		var records = []
+		if(category_processes.length > 0){
+			category_processes.map((val, key) => {
+				data.category_processes.map((el, ind) => {
+					if(val.category_process_id == el.category_process_id && val.category_process_id == data_categories.id){
+						records.push(
+							<View key={key} style={{paddingTop: 20, flexDirection: 'row', flex: 1, justifyContent: 'center'}}>
+								<View style={{flexDirection: 'column', alignItems: 'center', borderWidth: 1, width: 300, height: 300}}>
+									<TouchableOpacity style={{flex: 1, justifyContent: 'center'}}>
+										<Image source={cameraicon} style={{width: 50, height: 50}} />
+									</TouchableOpacity>
+								</View>
+							</View>
+						)
+					}
 				})
-			}
+			})
 		}
-		return record
+		return records
+	}
+	
+	const fillNGCategory = (val, key, type) => {
+		if(type == 'qty'){
+			let new_object	= [...ng_details]
+			new_object[key].ng_quantity = val
+			setNGDetails(new_object)
+		}else{
+			let new_object	= [...ng_details]
+			new_object[key].ng_category_id = val
+			setNGDetails(new_object)
+		}
 	}
 
-	const fillOperatorData = (el, key) => {
-		let new_object	= [...operator_process]
-		new_object[key].hrd_employee_id = el
-		setOperatorProcess(new_object)
+
+	const fillCategoryProcesses = (el, key) => {
+		let new_object	= [...category_processes]
+		new_object[key].img_base64_full = el
+		setNGDetails(new_object)
 	}
 
 	return(
@@ -459,20 +821,20 @@ const qc_form = ({route, navigation}) => {
 
 						<View style={{borderWidth: 0.5, flexDirection: 'row'}}>
 							<View style={{flex: 1, justifyContent: 'center', borderRightWidth: 0.3, alignItems: 'center', paddingHorizontal: 5, height: 25}}>
-								<Text style={{fontSize: 11}}>{product_internal_part_id != null ? product_internal_part_id : '-'}</Text>
+								<Text style={{fontSize: 11, fontWeight: 'bold'}}>{product_internal_part_id != null ? product_internal_part_id : '-'}</Text>
 							</View>
 							<View style={{width: '33%', justifyContent: 'center', borderRightWidth: 0.3, alignItems: 'center', height: 25, paddingHorizontal: 5}}>
-								<Text style={{fontSize: 11}}>{product_customer_part_number != null ? product_customer_part_number : '-'}</Text>
+								<Text style={{fontSize: 11, fontWeight: 'bold'}}>{product_customer_part_number != null ? product_customer_part_number : '-'}</Text>
 							</View>
 							<View style={{width: '33%', justifyContent: 'center', borderRightWidth: 0.3, alignItems: 'center', paddingHorizontal: 5, height: 25}}>
-								<Text style={{fontSize: 11}}>{product_model != null ? product_model : '-'}</Text>
+								<Text style={{fontSize: 11, fontWeight: 'bold'}}>Model: {product_model != null ? product_model : '-'}</Text>
 							</View>
 						</View>
 
 						{loading ? content() : <View style={{justifyContent: 'center'}}><ActivityIndicator size="large" color="#0000ff"/></View>}
 
 						{/* <View style={{flexDirection: 'row'}}> */}
-							{funcContent()}
+							{/* {funcContent()} */}
 						{/* </View> */}
 
 					</View>
