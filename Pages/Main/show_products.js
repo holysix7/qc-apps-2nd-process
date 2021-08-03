@@ -1,4 +1,4 @@
-import {Image, View, ScrollView, ActivityIndicator, RefreshControl, Alert} from 'react-native';
+import {Image, View, ScrollView, ActivityIndicator, RefreshControl, Alert, TouchableOpacity} from 'react-native';
 import React, {useEffect, useState, useCallback} from 'react';
 import LogoSIP from '../Assets/logo-sip370x50.png';
 import operators from '../Assets/operators.png';
@@ -90,9 +90,9 @@ const show_products = ({route, navigation}) => {
 									</View>
 									{
 										val.operator_status == 'Ready' ? 
-										<View style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}}>
+										<TouchableOp style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}}>
 											<Image source={operators} style={{width: 35, height: 35}} />
-										</View> :
+										</TouchableOp> :
 										null 
 									}
 								</View>
@@ -159,6 +159,54 @@ const show_products = ({route, navigation}) => {
 						</View>
 					)
 				}
+					// records.push( 
+					// 	<View key={key} style={styles.contenDateProduct}>
+					// 		<Button style={styles.productsButtonRunning} onPress={() => navigation.navigate('QCForm', {
+					// 			secproc_planning_product_item_id: val.secproc_planning_product_item_id,
+					// 			secproc_planning_product_id: val.secproc_planning_product_id,
+					// 			eng_product_id: val.eng_product_id,
+					// 			product_name: val.product_name,
+					// 			product_internal_part_id: val.product_internal_part_id,
+					// 			product_customer_part_number: val.product_customer_part_number,
+					// 			quantity: val.quantity,
+					// 			mkt_customer_name: val.mkt_customer_name,
+					// 			product_model: val.product_model,
+					// 			sys_plant_id: sys_plant_id,
+					// 			line_name: line_name,
+					// 			line_status: line_status
+					// 		})}>
+					// 			<View style={{flexDirection: 'row'}}>
+					// 				<View style={{flexDirection: 'column', flex: 1}}>
+					// 					<Text style={styles.fontButtonHeader}> {val.product_customer_part_number} </Text>   
+					// 					<Text style={styles.fontButtonFooter}> {val.product_name} </Text>   
+					// 				</View>
+					// 				<View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
+					// 					<Text style={styles.fontButtonFooter}> {val.product_internal_part_id} </Text>   
+					// 				</View>
+					// 				{
+					// 					val.operator_status == 'Ready' ? 
+					// 					<TouchableOpacity style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}} onPress={() => navigation.navigate('LeaderForm', {
+					// 						secproc_planning_product_item_id: val.secproc_planning_product_item_id,
+					// 						secproc_planning_product_id: val.secproc_planning_product_id,
+					// 						eng_product_id: val.eng_product_id,
+					// 						product_name: val.product_name,
+					// 						product_internal_part_id: val.product_internal_part_id,
+					// 						product_customer_part_number: val.product_customer_part_number,
+					// 						quantity: val.quantity,
+					// 						mkt_customer_name: val.mkt_customer_name,
+					// 						product_model: val.product_model,
+					// 						sys_plant_id: sys_plant_id,
+					// 						line_name: line_name,
+					// 						line_status: line_status
+					// 					})}>
+					// 						<Image source={operators} style={{width: 35, height: 35}} />
+					// 					</TouchableOpacity> :
+					// 					null 
+					// 				}
+					// 			</View>
+					// 		</Button>
+					// 	</View>
+					// )
       })
     }else{
 			records.push(

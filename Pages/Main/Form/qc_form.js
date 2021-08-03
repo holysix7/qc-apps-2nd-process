@@ -25,6 +25,7 @@ const qc_form = ({route, navigation}) => {
 	const [judgement_1st_piece, setJudgement] 		= useState(null)
 	const [output_process, setOutputProcess] 			= useState('0')
 	const [appearance_pn, setAppearancePN] 				= useState('0')
+	const [appearance_n, setAppearanceN] 				  = useState('0')
 	const [check_packing, setCheckPacking] 				= useState(null)
 	const [check_label, setCheckLabel] 						= useState(null)
 	const [final_judgement, setFinalJudgement] 		= useState(null)
@@ -126,6 +127,7 @@ const qc_form = ({route, navigation}) => {
 		// Axios.get('http://192.168.131.121:3000/api/v2/secprocs/new?', {params: params, headers: headers})
 		.then(response => {
 			setLoading(true)
+      // console.log(response.data.data.category_processes)
       setData(response.data.data)
       setCategories({id: response.data.data.category_processes[0].category_process_id, name: response.data.data.category_processes[0].category_process_name})
 			setObjectCategories({id: null, name: null, status: 'Non-Active'})
@@ -238,18 +240,44 @@ const qc_form = ({route, navigation}) => {
 		}
 	}
 
+	const AqlFunction = (val) => {
+		if(data != null){
+			if(data.aql_logic.length > 0){
+				setOutputProcess(val)
+				data.aql_logic.map((v, k) => {
+					if(val <= 1){
+						setAppearanceN('0')
+					}else{
+						if(val >= v.value_start && val <= v.value_end){
+							setAppearanceN(v.result)
+						}
+					}
+				})
+			}
+		}
+	}
+
 	const content = () => {
 		var category_process = []
+		var warna, color = null 
 		if(data != null){
 			if(data.category_processes.length > 0){
 				data.category_processes.map((val, key) => {
-					category_process.push(
-						<View key={key} style={{flexDirection: 'column', marginTop: 5, borderWidth: 0.3, marginHorizontal: 2, paddingHorizontal: 5}}>
-							<TouchableOpacity style={{flexDirection: 'column', height: 50, justifyContent: 'center'}} onPress={() => setCategories({id: val.category_process_id, name: val.category_process_name})}>
-								<Text>{val.category_process_name}</Text>
+					if(data_categories != null) {
+						if(val.category_process_id == data_categories.id){
+							warna = '#39A2DB'
+							color = 'white'
+						}else{
+							warna = 'grey'
+							color = 'black'
+						}
+						category_process.push(
+							<TouchableOpacity key={key} style={{flexDirection: 'column', height: 50, justifyContent: 'center', borderWidth: 0.3, marginHorizontal: 2, paddingHorizontal: 5, backgroundColor: warna}} onPress={() => setCategories({id: val.category_process_id, name: val.category_process_name})}>
+							{/* <TouchableOpacity style={{flexDirection: 'column', height: 50, justifyContent: 'center'}} onPress={() => setCategories({id: val.category_process_id, name: val.category_process_name})}> */}
+								<Text style={{color: color}}>{val.category_process_name}</Text>
 							</TouchableOpacity>
-						</View>
-					)
+						)
+					}
 				})
 			}else{
 				category_process.push(
@@ -291,7 +319,7 @@ const qc_form = ({route, navigation}) => {
 						<Text>:</Text>
 					</View>
 					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-						<TextInput style={{color: 'black', fontSize: 13}} value={output_process} onChangeText={(value) => setOutputProcess(value)} keyboardType='number-pad' />
+						<TextInput style={{color: 'black', fontSize: 13}} value={output_process} onChangeText={(value) => AqlFunction(value)} keyboardType='number-pad' />
 					</View>
 				</View>
 
@@ -316,7 +344,7 @@ const qc_form = ({route, navigation}) => {
 							<TextInput style={{color: 'black', fontSize: 13}} value={appearance_pn} onChangeText={(value) => setPnFunction(value)} keyboardType='number-pad' />
 						</View>
 						<View style={{flexDirection: 'row', alignItems: 'center', height: 40, borderWidth: 1, borderRadius: 5, marginTop: 5, backgroundColor: '#b8b8b8'}}>
-							<Text style={{fontSize: 13}}>{data != null ? data.appearance_n != null ? data.appearance_n : 'appearance_n nya dong' : '-' }</Text>
+							<Text style={{fontSize: 13}}>{parseInt(appearance_n) > 0 ? appearance_n : 0}</Text>
 						</View>
 					</View>
 				</View>
@@ -422,7 +450,7 @@ const qc_form = ({route, navigation}) => {
 
 						{listOperator()}
 						
-						<View style={{flexDirection: 'row', justifyContent: 'center', borderBottomWidth: 0.3}}>
+						<View style={{flexDirection: 'row', justifyContent: 'center', borderTopWidth: 0.3}}>
 							<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
 						</View>
 
@@ -430,7 +458,7 @@ const qc_form = ({route, navigation}) => {
 
 						{/* {
 							image_button ?  */}
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
+							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
 								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetailsImage(data_categories)}><Text>Tambah Foto</Text></Button>
 							</View> 
 
@@ -481,15 +509,15 @@ const qc_form = ({route, navigation}) => {
 
 						{listOperator()}
 						
-						<View style={{flexDirection: 'row', justifyContent: 'center', borderBottomWidth: 0.3}}>
-							<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
+						<View style={{flexDirection: 'row', justifyContent: 'center', borderTopWidth: 0.3}}>
+							<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
 						</View>
 
 						{list_ng_category()}
 
 						{/* {
 							image_button ?  */}
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
+							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
 								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetailsImage(data_categories)}><Text>Tambah Foto</Text></Button>
 							</View> 
 
@@ -540,7 +568,7 @@ const qc_form = ({route, navigation}) => {
 						
 						{listOperator()}
 						
-						<View style={{flexDirection: 'row', justifyContent: 'center', borderBottomWidth: 0.3}}>
+						<View style={{flexDirection: 'row', justifyContent: 'center', borderTopWidth: 0.3}}>
 							<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
 						</View>
 
@@ -548,7 +576,7 @@ const qc_form = ({route, navigation}) => {
 
 						{/* {
 							image_button ?  */}
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
+							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
 								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetailsImage(data_categories)}><Text>Tambah Foto</Text></Button>
 							</View> 
 
@@ -600,7 +628,7 @@ const qc_form = ({route, navigation}) => {
 						
 						{listOperator()}
 						
-						<View style={{flexDirection: 'row', justifyContent: 'center', borderBottomWidth: 0.3}}>
+						<View style={{flexDirection: 'row', justifyContent: 'center', borderTopWidth: 0.3}}>
 							<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
 						</View>
 
@@ -608,7 +636,7 @@ const qc_form = ({route, navigation}) => {
 
 						{/* {
 							image_button ?  */}
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
+							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
 								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetailsImage(data_categories)}><Text>Tambah Foto</Text></Button>
 							</View> 
 
@@ -699,7 +727,27 @@ const qc_form = ({route, navigation}) => {
 			img_base64_full: null
 		}])
 	}
-	console.log(category_processes)
+
+	const defect_function = () => {
+		var records = []
+		if(data != null){
+			if(data.category_processes.length > 0){
+				data.category_processes.map((v, k) => {
+					console.log(v.defect_categories)
+					if(v.defect_categories.length > 0){
+						v.defect_categories.map((el, key) => {
+							if(v.category_process_id == data_categories.id){
+								records.push(
+									<Picker.Item label={el.qc_ng_category_name} value={el.qc_ng_category_id} key={key} />
+								)
+							}
+						})
+					}
+				})
+			}
+		}
+		return records
+	}
 
 	const list_ng_category = () => {
 		var records = []
@@ -709,7 +757,7 @@ const qc_form = ({route, navigation}) => {
 				data.category_processes.map((element, index) => {
 					if(value.category_process_id == element.category_process_id && value.category_process_id == data_categories.id){
 						records.push(
-							<View key={key} style={{paddingTop: 20, flexDirection: 'row'}}>
+							<View key={key} style={{paddingTop: 5, flexDirection: 'row'}}>
 								<View style={{flexDirection: 'column', margin: 7, width: '10%', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 10, borderRadius: 5}}>
 									<Text style={{fontSize: 15}}> {iterasi++} </Text>
 								</View>
@@ -723,13 +771,12 @@ const qc_form = ({route, navigation}) => {
 										itemTextStyle={{fontSize: 9}}
 										>
 											{/* {loopingOperator()} */}
-											<Picker.Item label='Pilih' value='0' />
-											<Picker.Item label='Ancur Cuk' value='1' />
+											{defect_function()}
 										</Picker>
 									</View>
 								</View>
 								<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, width: '30%'}}>
-									<TextInput style={{color: 'black', fontSize: 13}} value={ng_details[key].ng_quantity} onChangeText={(value) => fillNGCategory(value, key, 'qty')} keyboardType='number-pad' />
+									<TextInput style={{color: 'black', fontSize: 13}} value={ng_details[key].ng_quantity} placeholder='0' onChangeText={(value) => fillNGCategory(value, key, 'qty')} keyboardType='number-pad' />
 								</View>
 							</View>	
 						)
@@ -804,7 +851,7 @@ const qc_form = ({route, navigation}) => {
 										<Text style={{fontWeight: 'bold', fontSize: 13}}>{date != null ? date : '-'}</Text>
 									</View>
 									<View style={{flexDirection: 'column', paddingLeft: 5, flex: 1, alignItems: 'center'}}>
-										<Text style={{fontWeight: 'bold', fontSize: 13}}>shift 1</Text>
+										<Text style={{fontWeight: 'bold', fontSize: 13}}>Shift {data != null ? data.current_hour : null}</Text>
 									</View>
 								</View>
 							</View>

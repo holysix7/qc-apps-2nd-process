@@ -111,6 +111,7 @@ const leader_form = ({route, navigation}) => {
 		.then(response => {
 			setLoading(true)
       setData(response.data.data)
+			setCategories({id: response.data.data.category_process_by_product[0].id, name: response.data.data.category_process_by_product[0].name})
 			console.log(response.data.status)
 		})
 		.catch(error => {
@@ -152,12 +153,14 @@ const leader_form = ({route, navigation}) => {
 				<View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
 					{category_process}
 				</View>
+				{funcContent()}
 			</View>
 		)
 	}
 
 	const funcContent = () => {
 		if(data_categories != null){
+			console.log(data_categories)
 			if(data_categories.id == 1){
 				return (
 					<ScrollView>
@@ -472,7 +475,7 @@ const leader_form = ({route, navigation}) => {
 						{loading ? content() : <View style={{justifyContent: 'center'}}><ActivityIndicator size="large" color="#0000ff"/></View>}
 
 						{/* <View style={{flexDirection: 'row'}}> */}
-							{funcContent()}
+							{/* {funcContent()} */}
 						{/* </View> */}
 
 					</View>
