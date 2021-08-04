@@ -8,27 +8,54 @@ import Axios from 'axios';
 import moment from 'moment';
 import app_version from	'../../System/app_version';
 import base_url from	'../../System/base_url';
+import {launchCamera} from 'react-native-image-picker';
 
 const qc_form = ({route, navigation}) => {
   const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name} = route.params
 	useEffect(() => {
 		get_data()
+		FixInspectionTime()
+		let isMounted = true
+		return () => {
+			isMounted = false
+		}
+		function FixInspectionTime() {
+			let initialDate    = moment();
+			var inspection     = setInterval(() => {
+				var currentDate    = moment();    
+				var second         = parseInt((currentDate - initialDate)/1000);
+				var minutes        = parseInt(second/60);
+				var hour           = parseInt(minutes/60);
+				var second_kedua   = second - (minutes*60); 
+				var menit_kedua    = minutes - (hour*60);
+				var second_asli    = (second >= 60 ? second_kedua : second);
+				var menit_asli     = (minutes >= 60 ? menit_kedua : minutes);
+				var CombiningTime  = (hour + ":" + menit_asli + ":" + second_asli);
+				if(isMounted) setInspectionTime(CombiningTime)
+			}, 1000);
+		}
 	}, [])
 	const [user_name, setUserName] 	      				= useState(null)
 	const [simpan_button, setSimpanButton] 	      = useState(null)
+
+	const [item_images, setItemImages] 	      		= useState([])
+	const [index_image, setIndexImage]						= useState(0)
+
 	const [image_button, setImageButton] 	      	= useState(true)
 	const [data, setData] 	              				= useState(null)
-	const [shift, setShift] 											= useState(1)
 	/**
 	 * Parameters
 	 */
+	const [shift, setShift] 											= useState(null)
 	const [judgement_1st_piece, setJudgement] 		= useState(null)
-	const [output_process, setOutputProcess] 			= useState('0')
-	const [appearance_pn, setAppearancePN] 				= useState('0')
-	const [appearance_n, setAppearanceN] 				  = useState('0')
+	const [output_process, setOutputProcess] 			= useState(null)
+	const [appearance_pn, setAppearancePN] 				= useState(null)
+	const [appearance_n, setAppearanceN] 				  = useState(null)
 	const [check_packing, setCheckPacking] 				= useState(null)
 	const [check_label, setCheckLabel] 						= useState(null)
 	const [final_judgement, setFinalJudgement] 		= useState(null)
+	const [note_unnormal, setNotUnnomral] 				= useState(null)
+	const [inspectionTime, setInspectionTime] 		= useState(null)
 
 	const [loading, setLoading] 									= useState(false)
 	const [neeple_cooling, setCooling] 						= useState(null)
@@ -46,18 +73,30 @@ const qc_form = ({route, navigation}) => {
 	let updated_at 																= moment().format("YYYY-MM-DD HH:mm:ss")
 	const planning_id = parseInt(planningId)
 
+	// console.log(category_processes)
+
 	const submit = async() => {
 		setLoading(false)
 		const user_id = await AsyncStorage.getItem('id')
 		const token = await AsyncStorage.getItem("key")
 		var body = {
-			tbl: 'planning_pic_product',
-			update_hour: sys_plant_id,
+			sys_plant_id: sys_plant_id,
 			app_version: app_version,
 			user_id: user_id,
+			tbl: 'daily_inspection',
 			secproc_planning_product_item_id: secproc_planning_product_item_id,
-			ng_details: ng_details,
-			sys_plant_id: sys_plant_id
+			shift: shift,
+			hour: data != null ? data.current_hour != null ? data.current_hour : null : null,
+			judgement_1st_piece: judgement_1st_piece,
+			output_process: output_process,
+			check_appearance_pn: appearance_pn,
+			check_packing: check_packing, 
+			check_label: check_label, 
+			final_judgement: final_judgement, 
+			inspection_time: inspectionTime, 
+			note_unnormal: note_unnormal, 
+			category_processes: category_processes, 
+			ng_details: ng_details
 		}
 		console.log(body)
 		var config = {
@@ -103,6 +142,32 @@ const qc_form = ({route, navigation}) => {
 			)
 		})
 	}
+	
+	const chooseImage = (i) => {
+		const options = {
+			includeBase64: true,
+			maxHeight: 1000,
+			maxWidth: 1000
+		};
+		launchCamera(options, (response) => {
+			if (response.didCancel) {
+				console.log('User cancelled image picker');
+			} else if (response.error) {
+				console.log('ImagePicker Error: ', response.error);
+			} else if (response.customButton) {
+				console.log('User tapped custom button: ', response.customButton);
+			} else {
+				const source = {counter_image: 1, uri: 'data:image/jpeg;base64;,' + response.assets[0].base64, status: 'active', ext: response.assets[0].fileName }
+        let newArray = [...category_processes]
+        var newExt   = source.ext
+        var news     = newExt.split(".").pop()
+        var fixedExt = '.' + news
+        newArray[i].img_base64_full = source.uri
+        newArray[i].ext = fixedExt
+        setCategoryProcesses(newArray)
+			}
+		})
+  }
 
 	const get_data = async() => {
 		const token = await AsyncStorage.getItem("key")
@@ -122,7 +187,6 @@ const qc_form = ({route, navigation}) => {
 			secproc_planning_product_item_id: secproc_planning_product_item_id,
 			shift: shift
 		}
-		// console.log(params)
 		Axios.get(`${base_url}/api/v2/secprocs/new?`, {params: params, headers: headers})
 		// Axios.get('http://192.168.131.121:3000/api/v2/secprocs/new?', {params: params, headers: headers})
 		.then(response => {
@@ -294,6 +358,26 @@ const qc_form = ({route, navigation}) => {
 
 				<View style={{flexDirection: 'row', marginTop: 15, borderTopWidth: 0.3}}>
 					<View style={{flexDirection: 'column', padding: 7, width: '40%'}}>
+						<Text>Shift</Text>
+					</View>
+					<View style={{flexDirection: 'column', padding: 7, paddingTop: 15}}>
+						<Text>:</Text>
+					</View>
+					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+						<Picker 
+							selectedValue={shift}
+							onValueChange={(val) => setShift(val)}
+						>
+							<Picker.Item label={'Pilih'} value={null} />
+							<Picker.Item label={'1'} value={'1'} />
+							<Picker.Item label={'2'} value={'2'} />
+							<Picker.Item label={'3'} value={'3'} />
+						</Picker>
+					</View>
+				</View>
+
+				<View style={{flexDirection: 'row', marginTop: 15}}>
+					<View style={{flexDirection: 'column', padding: 7, width: '40%'}}>
 						<Text>Judgement 1st Piece</Text>
 					</View>
 					<View style={{flexDirection: 'column', padding: 7, paddingTop: 15}}>
@@ -319,7 +403,7 @@ const qc_form = ({route, navigation}) => {
 						<Text>:</Text>
 					</View>
 					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-						<TextInput style={{color: 'black', fontSize: 13}} value={output_process} onChangeText={(value) => AqlFunction(value)} keyboardType='number-pad' />
+						<TextInput style={{color: 'black', fontSize: 13}} value={output_process != null ? output_process : null} onChangeText={(value) => AqlFunction(value)} keyboardType='number-pad' placeholder='0' />
 					</View>
 				</View>
 
@@ -341,7 +425,7 @@ const qc_form = ({route, navigation}) => {
 
 					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', paddingLeft: 5, flex: 1}}>
 						<View style={{flexDirection: 'row', height: 40, borderWidth: 1, borderRadius: 5}}>
-							<TextInput style={{color: 'black', fontSize: 13}} value={appearance_pn} onChangeText={(value) => setPnFunction(value)} keyboardType='number-pad' />
+							<TextInput style={{color: 'black', fontSize: 13}} value={appearance_pn != null ? appearance_pn : null} onChangeText={(value) => setPnFunction(value)} keyboardType='number-pad' placeholder='0' />
 						</View>
 						<View style={{flexDirection: 'row', alignItems: 'center', height: 40, borderWidth: 1, borderRadius: 5, marginTop: 5, backgroundColor: '#b8b8b8'}}>
 							<Text style={{fontSize: 13}}>{parseInt(appearance_n) > 0 ? appearance_n : 0}</Text>
@@ -458,11 +542,36 @@ const qc_form = ({route, navigation}) => {
 
 						{/* {
 							image_button ?  */}
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
-								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetailsImage(data_categories)}><Text>Tambah Foto</Text></Button>
-							</View> 
+							{
+								index_image < 2 ?
+								<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
+									<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
+								</View> : 
+								null
+							}
 
 						{image_category()}
+					
+
+						<View style={{flexDirection: 'row'}}>
+							<View style={{flexDirection: 'column', width: '40%', paddingHorizontal: 7, paddingTop: 12}}>
+								<Text>Note Unnormal</Text>
+							</View>
+							<View style={{flexDirection: 'column', paddingHorizontal: 7, paddingTop: 12}}>
+								<Text>:</Text>
+							</View>
+							<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+								<TextInput style={{color: 'black', fontSize: 13}} value={note_unnormal} onChangeText={(value) => setNotUnnomral(value)} />
+							</View>
+						</View>
+
+						{
+							inspectionTime != null ? 
+							<View style={{flexDirection: 'row', justifyContent: 'center'}}>
+								<Text>{inspectionTime}</Text>
+							</View>	:
+							null
+						}
 
 						{
 							simpan_button ? 
@@ -471,7 +580,6 @@ const qc_form = ({route, navigation}) => {
 							</View> :
 							null
 						}
-
 
 					</ScrollView>
 				)
@@ -517,11 +625,36 @@ const qc_form = ({route, navigation}) => {
 
 						{/* {
 							image_button ?  */}
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
-								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetailsImage(data_categories)}><Text>Tambah Foto</Text></Button>
-							</View> 
+							{
+								index_image < 2 ?
+								<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
+									<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
+								</View> :
+								null
+							}
 
 						{image_category()}
+					
+
+						<View style={{flexDirection: 'row'}}>
+							<View style={{flexDirection: 'column', width: '40%', padding: 7}}>
+								<Text>Note Unnormal</Text>
+							</View>
+							<View style={{flexDirection: 'column', padding: 7}}>
+								<Text>:</Text>
+							</View>
+							<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+								<TextInput style={{color: 'black', fontSize: 13}} value={note_unnormal} onChangeText={(value) => setNotUnnomral(value)} />
+							</View>
+						</View>
+
+						{
+							inspectionTime != null ? 
+							<View style={{flexDirection: 'row', justifyContent: 'center'}}>
+								<Text>{inspectionTime}</Text>
+							</View>	:
+							null
+						}
 
 
 						{
@@ -531,7 +664,6 @@ const qc_form = ({route, navigation}) => {
 							</View> :
 							null
 						}
-
 					</ScrollView>
 				)
 			}else if(data_categories.id == 3){
@@ -576,11 +708,36 @@ const qc_form = ({route, navigation}) => {
 
 						{/* {
 							image_button ?  */}
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
-								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetailsImage(data_categories)}><Text>Tambah Foto</Text></Button>
-							</View> 
+							{
+								index_image < 2 ?
+								<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
+									<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
+								</View> :
+								null								
+							}
 
 						{image_category()}
+					
+
+						<View style={{flexDirection: 'row'}}>
+							<View style={{flexDirection: 'column', width: '40%', padding: 7}}>
+								<Text>Note Unnormal</Text>
+							</View>
+							<View style={{flexDirection: 'column', padding: 7}}>
+								<Text>:</Text>
+							</View>
+							<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+								<TextInput style={{color: 'black', fontSize: 13}} value={note_unnormal} onChangeText={(value) => setNotUnnomral(value)} />
+							</View>
+						</View>
+
+						{
+							inspectionTime != null ? 
+							<View style={{flexDirection: 'row', justifyContent: 'center'}}>
+								<Text>{inspectionTime}</Text>
+							</View>	:
+							null
+						}
 
 						
 
@@ -591,7 +748,6 @@ const qc_form = ({route, navigation}) => {
 							</View> :
 							null
 						}
-
 					</ScrollView>
 				)
 			}else if(data_categories.id == 4){
@@ -636,11 +792,36 @@ const qc_form = ({route, navigation}) => {
 
 						{/* {
 							image_button ?  */}
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
-								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetailsImage(data_categories)}><Text>Tambah Foto</Text></Button>
-							</View> 
+							{
+								index_image < 2 ?
+								<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
+									<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
+								</View> :
+								null
+							}
 
 						{image_category()}
+					
+
+						<View style={{flexDirection: 'row'}}>
+							<View style={{flexDirection: 'column', width: '40%', padding: 7}}>
+								<Text>Note Unnormal</Text>
+							</View>
+							<View style={{flexDirection: 'column', padding: 7}}>
+								<Text>:</Text>
+							</View>
+							<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+								<TextInput style={{color: 'black', fontSize: 13}} value={note_unnormal} onChangeText={(value) => setNotUnnomral(value)} />
+							</View>
+						</View>
+
+						{
+							inspectionTime != null ? 
+							<View style={{flexDirection: 'row', justifyContent: 'center'}}>
+								<Text>{inspectionTime}</Text>
+							</View>	:
+							null
+						}
 
 						
 
@@ -651,7 +832,6 @@ const qc_form = ({route, navigation}) => {
 							</View> :
 							null
 						}
-
 					</ScrollView>
 				)
 			}
@@ -714,18 +894,24 @@ const qc_form = ({route, navigation}) => {
 			id: ng_details.length + 1,
 			category_process_id: value.id,
 			ng_category_id: 0,
-			ng_quantity: '0'
+			ng_quantity: null
 		}])
 	}
 
+  const addItemImage = (value) => {
+    setIndexImage(index_image + 1)
+    checkNGDetailsImage(value)
+  }
+
 	const checkNGDetailsImage = (value) => {
-		setImageButton(false)
-		setCategoryProcesses([...category_processes, {
-			id: category_processes.length + 1,
-			category_process_id: value.id,
-			name: value.name,
-			img_base64_full: null
-		}])
+    if(index_image < 2){
+			setCategoryProcesses([...category_processes, {
+				id: category_processes.length + 1,
+				category_process_id: value.id,
+				name: value.name,
+				img_base64_full: null
+			}])
+		}
 	}
 
 	const defect_function = () => {
@@ -733,7 +919,7 @@ const qc_form = ({route, navigation}) => {
 		if(data != null){
 			if(data.category_processes.length > 0){
 				data.category_processes.map((v, k) => {
-					console.log(v.defect_categories)
+					// console.log(v.defect_categories)
 					if(v.defect_categories.length > 0){
 						v.defect_categories.map((el, key) => {
 							if(v.category_process_id == data_categories.id){
@@ -776,7 +962,7 @@ const qc_form = ({route, navigation}) => {
 									</View>
 								</View>
 								<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, width: '30%'}}>
-									<TextInput style={{color: 'black', fontSize: 13}} value={ng_details[key].ng_quantity} placeholder='0' onChangeText={(value) => fillNGCategory(value, key, 'qty')} keyboardType='number-pad' />
+									<TextInput style={{color: 'black', fontSize: 13}} value={ng_details[key].ng_quantity != null ? ng_details[key].ng_quantity : null} placeholder='0' onChangeText={(value) => fillNGCategory(value, key, 'qty')} keyboardType='number-pad' />
 								</View>
 							</View>	
 						)
@@ -793,11 +979,17 @@ const qc_form = ({route, navigation}) => {
 			category_processes.map((val, key) => {
 				data.category_processes.map((el, ind) => {
 					if(val.category_process_id == el.category_process_id && val.category_process_id == data_categories.id){
+						if(val.img_base64_full != null){
+							var image = <Image source={{uri: val.img_base64_full}} style={{width: 270, height: 270, resizeMode: 'contain'}}/>
+						}else{
+							var image = <Image source={cameraicon} style={{width: 50, height: 50}} />
+
+						}
 						records.push(
 							<View key={key} style={{paddingTop: 20, flexDirection: 'row', flex: 1, justifyContent: 'center'}}>
 								<View style={{flexDirection: 'column', alignItems: 'center', borderWidth: 1, width: 300, height: 300}}>
-									<TouchableOpacity style={{flex: 1, justifyContent: 'center'}}>
-										<Image source={cameraicon} style={{width: 50, height: 50}} />
+									<TouchableOpacity style={{flex: 1, justifyContent: 'center'}} onPress={() => chooseImage(key)}>
+										{image}
 									</TouchableOpacity>
 								</View>
 							</View>
@@ -819,13 +1011,6 @@ const qc_form = ({route, navigation}) => {
 			new_object[key].ng_category_id = val
 			setNGDetails(new_object)
 		}
-	}
-
-
-	const fillCategoryProcesses = (el, key) => {
-		let new_object	= [...category_processes]
-		new_object[key].img_base64_full = el
-		setNGDetails(new_object)
 	}
 
 	return(
@@ -851,7 +1036,7 @@ const qc_form = ({route, navigation}) => {
 										<Text style={{fontWeight: 'bold', fontSize: 13}}>{date != null ? date : '-'}</Text>
 									</View>
 									<View style={{flexDirection: 'column', paddingLeft: 5, flex: 1, alignItems: 'center'}}>
-										<Text style={{fontWeight: 'bold', fontSize: 13}}>Shift {data != null ? data.current_hour : null}</Text>
+										<Text style={{fontWeight: 'bold', fontSize: 13}}>Jam Ke - {data != null ? data.current_hour : null}</Text>
 									</View>
 								</View>
 							</View>
