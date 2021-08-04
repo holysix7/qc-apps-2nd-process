@@ -67,7 +67,7 @@ const leader_form = ({route, navigation}) => {
 				[
 					{ 
 						text: "OK", 
-						onPress: () => console.log('ShowProducts')
+						onPress: () => navigation.navigate('ShowProducts')
 						// onPress: () => navigation.navigate('ShowProducts')
 					}
 				],

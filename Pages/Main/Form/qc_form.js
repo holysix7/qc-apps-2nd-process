@@ -98,7 +98,7 @@ const qc_form = ({route, navigation}) => {
 			category_processes: category_processes, 
 			ng_details: ng_details
 		}
-		console.log(body)
+		// console.log(body)
 		var config = {
 			method: 'post',
 			url: `${base_url}/api/v2/secprocs`,
@@ -120,7 +120,7 @@ const qc_form = ({route, navigation}) => {
 				[
 					{ 
 						text: "OK", 
-						onPress: () => console.log('ShowProducts')
+						onPress: () => navigation.navigate('ShowProducts')
 						// onPress: () => navigation.navigate('ShowProducts')
 					}
 				],
