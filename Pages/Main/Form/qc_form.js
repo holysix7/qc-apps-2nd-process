@@ -35,13 +35,9 @@ const qc_form = ({route, navigation}) => {
 			}, 1000);
 		}
 	}, [])
-	const [user_name, setUserName] 	      				= useState(null)
 	const [simpan_button, setSimpanButton] 	      = useState(null)
 
-	const [item_images, setItemImages] 	      		= useState([])
 	const [index_image, setIndexImage]						= useState(0)
-
-	const [image_button, setImageButton] 	      	= useState(true)
 	const [data, setData] 	              				= useState(null)
 	/**
 	 * Parameters
@@ -58,20 +54,10 @@ const qc_form = ({route, navigation}) => {
 	const [inspectionTime, setInspectionTime] 		= useState(null)
 
 	const [loading, setLoading] 									= useState(false)
-	const [neeple_cooling, setCooling] 						= useState(null)
-	const [standard_part, setStandard] 						= useState(null)
 	const [data_categories, setCategories]				= useState(null)
-	const [array_categories, newArrayCategories]	= useState([])
-	const [object_categories, setObjectCategories]= useState(null)
 	const [ng_details, setNGDetails]							= useState([])
 	const [category_processes, setCategoryProcesses]				= useState([])
-	const [created_by, setCreatedBy]		  				= useState(null)
-	const [updated_by, setUpdatedBy]		  				= useState(null)
-	const [planningId, setPlanningId]		  				= useState("")
 	let date 																			= moment().format("YYYY-MM-DD")
-	let created_at 																= moment().format("YYYY-MM-DD HH:mm:ss")
-	let updated_at 																= moment().format("YYYY-MM-DD HH:mm:ss")
-	const planning_id = parseInt(planningId)
 
 	// console.log(category_processes)
 
@@ -169,13 +155,11 @@ const qc_form = ({route, navigation}) => {
 		})
   }
 
-	const get_data = async() => {
+	const get_data = async(val) => {
+		setShift(val)
 		const token = await AsyncStorage.getItem("key")
 		const user_id = await AsyncStorage.getItem('id')
 		const name = await AsyncStorage.getItem('name')
-		setCreatedBy(user_id)
-		setUpdatedBy(user_id)
-		setUserName(name)
 		const headers = {
 			'Authorization': token
 		}
@@ -185,7 +169,7 @@ const qc_form = ({route, navigation}) => {
 			sys_plant_id: sys_plant_id,
 			user_id: user_id,
 			secproc_planning_product_item_id: secproc_planning_product_item_id,
-			shift: shift
+			shift: val
 		}
 		Axios.get(`${base_url}/api/v2/secprocs/new?`, {params: params, headers: headers})
 		// Axios.get('http://192.168.131.121:3000/api/v2/secprocs/new?', {params: params, headers: headers})
@@ -194,16 +178,6 @@ const qc_form = ({route, navigation}) => {
       // console.log(response.data.data.category_processes)
       setData(response.data.data)
       setCategories({id: response.data.data.category_processes[0].category_process_id, name: response.data.data.category_processes[0].category_process_name})
-			setObjectCategories({id: null, name: null, status: 'Non-Active'})
-			var array_kosong = []
-			response.data.data.category_processes.map((v, k) => {
-				array_kosong.push({
-					id: v.category_process_id,
-					name: v.category_process_name,
-					status: 'Non-Active'
-				})
-			})
-			newArrayCategories(array_kosong)
 			console.log(response.data.status)
 		})
 		.catch(error => {
@@ -366,7 +340,7 @@ const qc_form = ({route, navigation}) => {
 					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
 						<Picker 
 							selectedValue={shift}
-							onValueChange={(val) => setShift(val)}
+							onValueChange={(val) => get_data(val)}
 						>
 							<Picker.Item label={'Pilih'} value={null} />
 							<Picker.Item label={'1'} value={'1'} />
@@ -914,12 +888,12 @@ const qc_form = ({route, navigation}) => {
 		}
 	}
 
+	console.log(data.category_processes)
 	const defect_function = () => {
 		var records = []
 		if(data != null){
 			if(data.category_processes.length > 0){
 				data.category_processes.map((v, k) => {
-					// console.log(v.defect_categories)
 					if(v.defect_categories.length > 0){
 						v.defect_categories.map((el, key) => {
 							if(v.category_process_id == data_categories.id){
@@ -941,6 +915,7 @@ const qc_form = ({route, navigation}) => {
 		if(ng_details.length > 0){
 			ng_details.map((value, key) => {
 				data.category_processes.map((element, index) => {
+					// console.log()
 					if(value.category_process_id == element.category_process_id && value.category_process_id == data_categories.id){
 						records.push(
 							<View key={key} style={{paddingTop: 5, flexDirection: 'row'}}>
@@ -1025,7 +1000,12 @@ const qc_form = ({route, navigation}) => {
 
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', borderTopWidth: 0.3, borderRightWidth: 0.3, padding: 15, justifyContent: 'center', alignItems: 'center', width: "50%", backgroundColor: '#dfe0df'}}>
-								<Text style={{marginTop: 1, fontWeight: 'bold', fontSize: 17}}>Form Check Sheet</Text>
+								<View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%'}}>
+									<Text style={{marginTop: 1, fontWeight: 'bold'}}>Check Sheet</Text>
+								</View>
+								<View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%'}}>
+									<Text style={{marginTop: 1, fontWeight: 'bold'}}>2nd Process</Text>
+								</View>
 							</View>
 							<View style={{flexDirection: 'column', flex: 1}}>
 								<View style={{flexDirection: 'row', borderTopWidth: 0.3, height: 40, justifyContent: 'center', alignItems: 'center'}}>
