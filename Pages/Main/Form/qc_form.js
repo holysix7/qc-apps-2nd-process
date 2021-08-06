@@ -11,10 +11,12 @@ import base_url from	'../../System/base_url';
 import {launchCamera} from 'react-native-image-picker';
 
 const qc_form = ({route, navigation}) => {
-  const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name} = route.params
+  const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name, default_shift} = route.params
 	useEffect(() => {
-		get_data()
-		FixInspectionTime()
+		get_data()		
+		// setInterval(() => {
+			FixInspectionTime()
+		// }, 3500);
 		let isMounted = true
 		return () => {
 			isMounted = false
@@ -42,7 +44,7 @@ const qc_form = ({route, navigation}) => {
 	/**
 	 * Parameters
 	 */
-	const [shift, setShift] 											= useState(1)
+	const [shift, setShift] 											= useState(default_shift)
 	const [judgement_1st_piece, setJudgement] 		= useState(null)
 	const [output_process, setOutputProcess] 			= useState(null)
 	const [appearance_pn, setAppearancePN] 				= useState(null)
@@ -58,8 +60,8 @@ const qc_form = ({route, navigation}) => {
 	const [ng_details, setNGDetails]							= useState([])
 	const [category_processes, setCategoryProcesses]				= useState([])
 	let date 																			= moment().format("YYYY-MM-DD")
-
-	// console.log(category_processes)
+	var new_shift = default_shift + 'abc'
+	// console.log('default: ', default_shift)
 
 	const submit = async() => {
 		setLoading(false)
@@ -156,7 +158,10 @@ const qc_form = ({route, navigation}) => {
   }
 
 	const get_data = async(val) => {
-		setShift(val)
+		if(val > 0){
+			setShift(val)
+		}
+		console.log(val)
 		const token = await AsyncStorage.getItem("key")
 		const user_id = await AsyncStorage.getItem('id')
 		const name = await AsyncStorage.getItem('name')
@@ -170,14 +175,13 @@ const qc_form = ({route, navigation}) => {
 			sys_plant_id: sys_plant_id,
 			user_id: user_id,
 			secproc_planning_product_item_id: secproc_planning_product_item_id,
-			shift: val > 1 ? val : 1
+			shift: val > 1 ? val : default_shift
 		}
-		console.log(params)
 		Axios.get(`${base_url}/api/v2/secprocs/new?`, {params: params, headers: headers})
 		// Axios.get('http://192.168.131.121:3000/api/v2/secprocs/new?', {params: params, headers: headers})
 		.then(response => {
 			setLoading(true)
-      // console.log(response.data.data.category_processes)
+      // console.log(response.data.data.category_processes[0])
       setData(response.data.data)
       setCategories({id: response.data.data.category_processes[0].category_process_id, name: response.data.data.category_processes[0].category_process_name})
 			console.log(response.data.status)
@@ -297,12 +301,74 @@ const qc_form = ({route, navigation}) => {
 		}
 	}
 
+	const functionShift = () => {
+		if(default_shift < 2){
+			return (
+				<View style={{flexDirection: 'row', marginTop: 15, borderTopWidth: 0.3}}>
+					<View style={{flexDirection: 'column', padding: 7, width: '40%'}}>
+						<Text>Shift</Text>
+					</View>
+					<View style={{flexDirection: 'column', padding: 7, paddingTop: 15}}>
+						<Text>:</Text>
+					</View>
+					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+						<Picker 
+							selectedValue={shift}
+							onValueChange={(val) => get_data(val)}
+						>
+							<Picker.Item label={'Pilih'} value={null} />
+							<Picker.Item label={'1'} value={'1'} />
+							<Picker.Item label={'2'} value={'2'} />
+							<Picker.Item label={'3'} value={'3'} />
+						</Picker>
+					</View>
+				</View>				
+			)
+		}else if(default_shift < 3){
+			return (
+				<View style={{flexDirection: 'row', marginTop: 15, borderTopWidth: 0.3}}>
+					<View style={{flexDirection: 'column', padding: 7, width: '40%'}}>
+						<Text>Shift</Text>
+					</View>
+					<View style={{flexDirection: 'column', padding: 7, paddingTop: 15}}>
+						<Text>:</Text>
+					</View>
+					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+						<Picker 
+							selectedValue={shift}
+							onValueChange={(val) => get_data(val)}
+						>
+							<Picker.Item label={'Pilih'} value={null} />
+							<Picker.Item label={'2'} value={'2'} />
+							<Picker.Item label={'3'} value={'3'} />
+						</Picker>
+					</View>
+				</View>	
+			)
+		}else{
+			return (
+				<View style={{flexDirection: 'row', marginTop: 15, borderTopWidth: 0.3}}>
+					<View style={{flexDirection: 'column', padding: 7, width: '40%'}}>
+						<Text>Shift</Text>
+					</View>
+					<View style={{flexDirection: 'column', padding: 7, paddingTop: 15}}>
+						<Text>:</Text>
+					</View>
+					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1, backgroundColor: '#b8b8b8'}}>
+						<Text>{default_shift}</Text>
+					</View>
+				</View>	
+			)
+		}
+	}
+
 	const content = () => {
 		var category_process = []
 		var warna, color = null 
 		if(data != null){
 			if(data.category_processes.length > 0){
 				data.category_processes.map((val, key) => {
+				// console.log(val.category_process_name)
 					if(data_categories != null) {
 						if(val.category_process_id == data_categories.id){
 							warna = '#39A2DB'
@@ -332,25 +398,7 @@ const qc_form = ({route, navigation}) => {
 		return (
 			<ScrollView key={'content'} style={{flexDirection: 'column'}}>
 
-				<View style={{flexDirection: 'row', marginTop: 15, borderTopWidth: 0.3}}>
-					<View style={{flexDirection: 'column', padding: 7, width: '40%'}}>
-						<Text>Shift</Text>
-					</View>
-					<View style={{flexDirection: 'column', padding: 7, paddingTop: 15}}>
-						<Text>:</Text>
-					</View>
-					<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-						<Picker 
-							selectedValue={shift}
-							onValueChange={(val) => get_data(val)}
-						>
-							<Picker.Item label={'Pilih'} value={null} />
-							<Picker.Item label={'1'} value={'1'} />
-							<Picker.Item label={'2'} value={'2'} />
-							<Picker.Item label={'3'} value={'3'} />
-						</Picker>
-					</View>
-				</View>
+				{functionShift()}
 
 				<View style={{flexDirection: 'row', marginTop: 15}}>
 					<View style={{flexDirection: 'column', padding: 7, width: '40%'}}>
@@ -895,6 +943,7 @@ const qc_form = ({route, navigation}) => {
 		if(data != null){
 			if(data.category_processes.length > 0){
 				data.category_processes.map((v, k) => {
+					console.log(v.defect_categories)
 					if(v.defect_categories.length > 0){
 						v.defect_categories.map((el, key) => {
 							if(v.category_process_id == data_categories.id){

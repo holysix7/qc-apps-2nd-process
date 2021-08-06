@@ -164,6 +164,13 @@ const leader_form = ({route, navigation}) => {
 					{category_process}
 				</View>
 				{funcContent()}
+				{
+					simpan_button ? 
+					<View style={{flexDirection: 'row', justifyContent: 'center'}}>
+						<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => submit()}><Text>Simpan</Text></Button>
+					</View> :
+					null
+				}
 			</View>
 		)
 	}
@@ -173,7 +180,7 @@ const leader_form = ({route, navigation}) => {
 			// console.log(data_categories)
 			if(data_categories.id == 1){
 				return (
-					<ScrollView>
+					<ScrollView style={{height: '52%'}}>
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Category Process</Text>
@@ -206,20 +213,12 @@ const leader_form = ({route, navigation}) => {
 						</View>
 
 						{listOperator()}
-
-						{
-							simpan_button ? 
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
-								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => submit()}><Text>Simpan</Text></Button>
-							</View> :
-							null
-						}
 
 					</ScrollView>
 				)
 			}else if(data_categories.id == 2){
 				return (
-					<ScrollView>
+					<ScrollView style={{height: '52%'}}>
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Category Process</Text>
@@ -251,20 +250,12 @@ const leader_form = ({route, navigation}) => {
 						</View>
 
 						{listOperator()}
-
-						{
-							simpan_button ? 
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
-								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => submit()}><Text>Simpan</Text></Button>
-							</View> :
-							null
-						}
 
 					</ScrollView>
 				)
 			}else if(data_categories.id == 3){
 				return (
-					<ScrollView>
+					<ScrollView style={{height: '52%'}}>
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Category Process</Text>
@@ -296,20 +287,12 @@ const leader_form = ({route, navigation}) => {
 						</View>
 						
 						{listOperator()}
-
-						{
-							simpan_button ? 
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
-								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => submit()}><Text>Simpan</Text></Button>
-							</View> :
-							null
-						}
 
 					</ScrollView>
 				)
 			}else if(data_categories.id == 4){
 				return (
-					<ScrollView>
+					<ScrollView style={{height: '52%'}}>
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Category Process</Text>
@@ -341,14 +324,6 @@ const leader_form = ({route, navigation}) => {
 						</View>
 						
 						{listOperator()}
-
-						{
-							simpan_button ? 
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
-								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => submit()}><Text>Simpan</Text></Button>
-							</View> :
-							null
-						}
 
 					</ScrollView>
 				)

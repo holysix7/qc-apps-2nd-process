@@ -62,7 +62,7 @@ const show_products = ({route, navigation}) => {
     var records = []
     if(data.length > 0){
       data.map((val, key) => {
-				console.log(val.next_screen)
+				console.log(val)
 				if(val.next_screen == 'leader_form'){
 					records.push( 
 						<View key={key} style={styles.contenDateProduct}>
@@ -78,7 +78,8 @@ const show_products = ({route, navigation}) => {
 								product_model: val.product_model,
 								sys_plant_id: sys_plant_id,
 								line_name: line_name,
-								line_status: line_status
+								line_status: line_status,
+								default_shift: val.shift
 							})}>
 								<View style={{flexDirection: 'row'}}>
 									<View style={{flexDirection: 'column', flex: 1}}>
@@ -100,6 +101,7 @@ const show_products = ({route, navigation}) => {
 						</View>
 					)
 				}else if(val.next_screen == 'qc_form'){
+					var  new_shift = val.shift + 'abc'
 					records.push( 
 						<View key={key} style={styles.contenDateProduct}>
 							<Button style={styles.productsButtonRunning} onPress={() => navigation.navigate('QCForm', {
@@ -114,7 +116,8 @@ const show_products = ({route, navigation}) => {
 								product_model: val.product_model,
 								sys_plant_id: sys_plant_id,
 								line_name: line_name,
-								line_status: line_status
+								line_status: line_status,
+								default_shift: new_shift[0]
 							})}>
 								<View style={{flexDirection: 'row'}}>
 									<View style={{flexDirection: 'column', flex: 1}}>
