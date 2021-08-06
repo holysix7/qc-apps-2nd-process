@@ -42,7 +42,7 @@ const qc_form = ({route, navigation}) => {
 	/**
 	 * Parameters
 	 */
-	const [shift, setShift] 											= useState(null)
+	const [shift, setShift] 											= useState(1)
 	const [judgement_1st_piece, setJudgement] 		= useState(null)
 	const [output_process, setOutputProcess] 			= useState(null)
 	const [appearance_pn, setAppearancePN] 				= useState(null)
@@ -163,14 +163,16 @@ const qc_form = ({route, navigation}) => {
 		const headers = {
 			'Authorization': token
 		}
+		// console.log(val != null ? val : 'wkwkk')
 		const params = {
 			tbl: 'daily_inspection',
 			app_version: app_version,
 			sys_plant_id: sys_plant_id,
 			user_id: user_id,
 			secproc_planning_product_item_id: secproc_planning_product_item_id,
-			shift: val
+			shift: val > 1 ? val : 1
 		}
+		console.log(params)
 		Axios.get(`${base_url}/api/v2/secprocs/new?`, {params: params, headers: headers})
 		// Axios.get('http://192.168.131.121:3000/api/v2/secprocs/new?', {params: params, headers: headers})
 		.then(response => {
@@ -517,7 +519,7 @@ const qc_form = ({route, navigation}) => {
 						{/* {
 							image_button ?  */}
 							{
-								index_image < 2 ?
+								index_image < 5 ?
 								<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
 									<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
 								</View> : 
@@ -600,7 +602,7 @@ const qc_form = ({route, navigation}) => {
 						{/* {
 							image_button ?  */}
 							{
-								index_image < 2 ?
+								index_image < 5 ?
 								<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
 									<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
 								</View> :
@@ -683,7 +685,7 @@ const qc_form = ({route, navigation}) => {
 						{/* {
 							image_button ?  */}
 							{
-								index_image < 2 ?
+								index_image < 5 ?
 								<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
 									<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
 								</View> :
@@ -767,7 +769,7 @@ const qc_form = ({route, navigation}) => {
 						{/* {
 							image_button ?  */}
 							{
-								index_image < 2 ?
+								index_image < 5 ?
 								<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
 									<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
 								</View> :
@@ -878,7 +880,7 @@ const qc_form = ({route, navigation}) => {
   }
 
 	const checkNGDetailsImage = (value) => {
-    if(index_image < 2){
+    if(index_image < 5){
 			setCategoryProcesses([...category_processes, {
 				id: category_processes.length + 1,
 				category_process_id: value.id,
@@ -888,7 +890,6 @@ const qc_form = ({route, navigation}) => {
 		}
 	}
 
-	console.log(data.category_processes)
 	const defect_function = () => {
 		var records = []
 		if(data != null){
@@ -999,12 +1000,12 @@ const qc_form = ({route, navigation}) => {
 						</View>
 
 						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', borderTopWidth: 0.3, borderRightWidth: 0.3, padding: 15, justifyContent: 'center', alignItems: 'center', width: "50%", backgroundColor: '#dfe0df'}}>
+							<View style={{flexDirection: 'column', borderTopWidth: 0.3, borderRightWidth: 0.3, justifyContent: 'center', alignItems: 'center', width: "50%", backgroundColor: '#dfe0df'}}>
 								<View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%'}}>
-									<Text style={{marginTop: 1, fontWeight: 'bold'}}>Check Sheet</Text>
+									<Text style={{fontWeight: 'bold'}}>Check Sheet</Text>
 								</View>
 								<View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%'}}>
-									<Text style={{marginTop: 1, fontWeight: 'bold'}}>2nd Process</Text>
+									<Text style={{fontWeight: 'bold'}}>2nd Process</Text>
 								</View>
 							</View>
 							<View style={{flexDirection: 'column', flex: 1}}>

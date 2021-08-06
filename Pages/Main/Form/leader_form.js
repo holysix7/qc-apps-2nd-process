@@ -7,6 +7,7 @@ import Axios from 'axios';
 import moment from 'moment';
 import app_version from	'../../System/app_version';
 import base_url from	'../../System/base_url';
+import AutocompleteInput from 'react-native-autocomplete-input';
 
 const leader_form = ({route, navigation}) => {
   const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name} = route.params
@@ -120,17 +121,26 @@ const leader_form = ({route, navigation}) => {
 	}
 
 	const content = () => {
-		var form = []
 		var category_process = []
+		var warna, color = null 
 		if(data != null){
 			if(data.category_process_by_product.length > 0){
 				data.category_process_by_product.map((val, key) => {
+					if(data_categories != null){
+						if(val.id == data_categories.id){
+							warna = '#39A2DB'
+							color = 'white'
+						}else{
+							warna = 'grey'
+							color = 'black'
+						}
+					}
 					category_process.push(
-						<View key={key} style={{flexDirection: 'row', marginTop: 5, borderWidth: 0.3, marginHorizontal: 2, paddingHorizontal: 5}}>
-							<TouchableOpacity style={{flexDirection: 'column', height: 50, justifyContent: 'center'}} onPress={() => setCategories({id: val.id, name: val.name})}>
+						// <View key={key} style={{flexDirection: 'row', marginTop: 5, borderWidth: 0.3, marginHorizontal: 2, paddingHorizontal: 5}}>
+							<TouchableOpacity key={key} style={{flexDirection: 'column', height: 50, justifyContent: 'center', borderWidth: 0.3, marginHorizontal: 2, paddingHorizontal: 5, backgroundColor: warna}} onPress={() => setCategories({id: val.id, name: val.name})}>
 								<Text>{val.name}</Text>
 							</TouchableOpacity>
-						</View>
+						// </View>
 					)
 				})
 			}else{
@@ -160,7 +170,7 @@ const leader_form = ({route, navigation}) => {
 
 	const funcContent = () => {
 		if(data_categories != null){
-			console.log(data_categories)
+			// console.log(data_categories)
 			if(data_categories.id == 1){
 				return (
 					<ScrollView>
@@ -388,6 +398,15 @@ const leader_form = ({route, navigation}) => {
 										>
 											{loopingOperator()}
 										</Picker>
+										{/* <AutocompleteInput 
+											data={data != null ? data.operator_list : null}
+											value={operator_process[key].hrd_employee_id}
+											onChangeText={(value) => fillOperatorData(value, key)}
+											flatListProps={{
+												keyExtractor: (_, idx) => idx,
+												renderItem: ({ item }) => <Text>{item}</Text>,
+											}}
+										/> */}
 									</View>
 								</View>
 							</View>	
@@ -398,6 +417,10 @@ const leader_form = ({route, navigation}) => {
 		}
 		return records
 	}
+
+	// if(data != null){
+	// 	console.log(data.operator_list)
+	// }
 
 	const loopingOperator = () => {
 		var record = []
