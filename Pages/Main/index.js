@@ -328,12 +328,7 @@ const Main = ({navigation}) => {
       </View>
     )
   }
-
-  // const onRefresh = useCallback(() => {
-  //   setRefreshing(true);
-  //   lines(cekId);
-  // }, []);
-
+  
   const onRefresh = () => {
     setLoading(false)
     setInterval(() => {

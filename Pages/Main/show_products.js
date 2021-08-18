@@ -7,8 +7,6 @@ import axios from 'axios';
 import { Container, Text, Button } from 'native-base';
 import styles from '../Styles/Styling';
 import app_version from '../System/app_version';
-import app_name from '../System/app_name';
-import checklist from '../Assets/check.png';
 import base_url from '../System/base_url';
 
 const show_products = ({route, navigation}) => {
@@ -34,7 +32,6 @@ const show_products = ({route, navigation}) => {
 			secproc_part_line_id: line_id,
 		}
 		axios.get(`${base_url}/api/v2/secprocs?`, {params: params, headers: headers})
-		// axios.get('http://192.168.131.121:3000/api/v2/secprocs?', {params: params, headers: headers})
 		.then(response => {
 			setLoading(true)
       setRefreshing(false)
@@ -64,152 +61,68 @@ const show_products = ({route, navigation}) => {
       data.map((val, key) => {
 				console.log(val)
 				if(val.next_screen == 'leader_form'){
-					records.push( 
-						<View key={key} style={styles.contenDateProduct}>
-							<Button style={styles.productsButtonRunning} onPress={() => navigation.navigate('LeaderForm', {
-								secproc_planning_product_item_id: val.secproc_planning_product_item_id,
-								secproc_planning_product_id: val.secproc_planning_product_id,
-								eng_product_id: val.eng_product_id,
-								product_name: val.product_name,
-								product_internal_part_id: val.product_internal_part_id,
-								product_customer_part_number: val.product_customer_part_number,
-								quantity: val.quantity,
-								mkt_customer_name: val.mkt_customer_name,
-								product_model: val.product_model,
-								sys_plant_id: sys_plant_id,
-								line_name: line_name,
-								line_status: line_status,
-								default_shift: val.shift
-							})}>
-								<View style={{flexDirection: 'row'}}>
-									<View style={{flexDirection: 'column', flex: 1}}>
-										<Text style={styles.fontButtonHeader}> {val.product_customer_part_number} </Text>   
-										<Text style={styles.fontButtonFooter}> {val.product_name} </Text>   
-									</View>
-									<View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
-										<Text style={styles.fontButtonFooter}> {val.product_internal_part_id} </Text>   
-									</View>
-									{
-										val.operator_status == 'Ready' ? 
-										<TouchableOp style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}}>
-											<Image source={operators} style={{width: 35, height: 35}} />
-										</TouchableOp> :
-										null 
-									}
-								</View>
-							</Button>
-						</View>
-					)
+					var button_status = true
+					var new_shift 		= val.shift
+					var route 				= 'LeaderForm'
+					var route_params 	= {
+						secproc_planning_product_item_id: val.secproc_planning_product_item_id,
+						secproc_planning_product_id: val.secproc_planning_product_id,
+						eng_product_id: val.eng_product_id,
+						product_name: val.product_name,
+						product_internal_part_id: val.product_internal_part_id,
+						product_customer_part_number: val.product_customer_part_number,
+						quantity: val.quantity,
+						mkt_customer_name: val.mkt_customer_name,
+						product_model: val.product_model,
+						sys_plant_id: sys_plant_id,
+						line_name: line_name,
+						line_status: line_status,
+						default_shift: new_shift
+					}
 				}else if(val.next_screen == 'qc_form'){
-					var  new_shift = val.shift + 'abc'
-					records.push( 
-						<View key={key} style={styles.contenDateProduct}>
-							<Button style={styles.productsButtonRunning} onPress={() => navigation.navigate('QCForm', {
-								secproc_planning_product_item_id: val.secproc_planning_product_item_id,
-								secproc_planning_product_id: val.secproc_planning_product_id,
-								eng_product_id: val.eng_product_id,
-								product_name: val.product_name,
-								product_internal_part_id: val.product_internal_part_id,
-								product_customer_part_number: val.product_customer_part_number,
-								quantity: val.quantity,
-								mkt_customer_name: val.mkt_customer_name,
-								product_model: val.product_model,
-								sys_plant_id: sys_plant_id,
-								line_name: line_name,
-								line_status: line_status,
-								default_shift: new_shift[0]
-							})}>
-								<View style={{flexDirection: 'row'}}>
-									<View style={{flexDirection: 'column', flex: 1}}>
-										<Text style={styles.fontButtonHeader}> {val.product_customer_part_number} </Text>   
-										<Text style={styles.fontButtonFooter}> {val.product_name} </Text>   
-									</View>
-									<View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
-										<Text style={styles.fontButtonFooter}> {val.product_internal_part_id} </Text>   
-									</View>
-									{
-										val.operator_status == 'Ready' ? 
-										<View style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}}>
-											<Image source={operators} style={{width: 35, height: 35}} />
-										</View> :
-										null 
-									}
-								</View>
-							</Button>
-						</View>
-					)
+					var button_status = true
+					var new_shift 		= val.shift + 'abc'
+					var route 				= 'QCForm'
+					var route_params 	= {
+						secproc_planning_product_item_id: val.secproc_planning_product_item_id,
+						secproc_planning_product_id: val.secproc_planning_product_id,
+						eng_product_id: val.eng_product_id,
+						product_name: val.product_name,
+						product_internal_part_id: val.product_internal_part_id,
+						product_customer_part_number: val.product_customer_part_number,
+						quantity: val.quantity,
+						mkt_customer_name: val.mkt_customer_name,
+						product_model: val.product_model,
+						sys_plant_id: sys_plant_id,
+						line_name: line_name,
+						line_status: line_status,
+						default_shift: new_shift[0]
+					}
 				}else{
-					records.push( 
-						<View key={key} style={styles.contenDateProduct}>
-							<Button style={styles.productsButtonRunning} onPress={() => alert('Maaf anda tidak memiliki akses')}>
-								<View style={{flexDirection: 'row'}}>
-									<View style={{flexDirection: 'column', flex: 1}}>
-										<Text style={styles.fontButtonHeader}> {val.product_customer_part_number} </Text>   
-										<Text style={styles.fontButtonFooter}> {val.product_name} </Text>   
-									</View>
-									<View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
-										<Text style={styles.fontButtonFooter}> {val.product_internal_part_id} </Text>   
-									</View>
-									{
-										val.operator_status == 'Ready' ? 
-										<View style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}}>
-											<Image source={operators} style={{width: 35, height: 35}} />
-										</View> :
-										null 
-									}
-								</View>
-							</Button>
-						</View>
-					)
+					var button_status = false
 				}
-					// records.push( 
-					// 	<View key={key} style={styles.contenDateProduct}>
-					// 		<Button style={styles.productsButtonRunning} onPress={() => navigation.navigate('QCForm', {
-					// 			secproc_planning_product_item_id: val.secproc_planning_product_item_id,
-					// 			secproc_planning_product_id: val.secproc_planning_product_id,
-					// 			eng_product_id: val.eng_product_id,
-					// 			product_name: val.product_name,
-					// 			product_internal_part_id: val.product_internal_part_id,
-					// 			product_customer_part_number: val.product_customer_part_number,
-					// 			quantity: val.quantity,
-					// 			mkt_customer_name: val.mkt_customer_name,
-					// 			product_model: val.product_model,
-					// 			sys_plant_id: sys_plant_id,
-					// 			line_name: line_name,
-					// 			line_status: line_status
-					// 		})}>
-					// 			<View style={{flexDirection: 'row'}}>
-					// 				<View style={{flexDirection: 'column', flex: 1}}>
-					// 					<Text style={styles.fontButtonHeader}> {val.product_customer_part_number} </Text>   
-					// 					<Text style={styles.fontButtonFooter}> {val.product_name} </Text>   
-					// 				</View>
-					// 				<View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
-					// 					<Text style={styles.fontButtonFooter}> {val.product_internal_part_id} </Text>   
-					// 				</View>
-					// 				{
-					// 					val.operator_status == 'Ready' ? 
-					// 					<TouchableOpacity style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}} onPress={() => navigation.navigate('LeaderForm', {
-					// 						secproc_planning_product_item_id: val.secproc_planning_product_item_id,
-					// 						secproc_planning_product_id: val.secproc_planning_product_id,
-					// 						eng_product_id: val.eng_product_id,
-					// 						product_name: val.product_name,
-					// 						product_internal_part_id: val.product_internal_part_id,
-					// 						product_customer_part_number: val.product_customer_part_number,
-					// 						quantity: val.quantity,
-					// 						mkt_customer_name: val.mkt_customer_name,
-					// 						product_model: val.product_model,
-					// 						sys_plant_id: sys_plant_id,
-					// 						line_name: line_name,
-					// 						line_status: line_status
-					// 					})}>
-					// 						<Image source={operators} style={{width: 35, height: 35}} />
-					// 					</TouchableOpacity> :
-					// 					null 
-					// 				}
-					// 			</View>
-					// 		</Button>
-					// 	</View>
-					// )
+				records.push( 
+					<View key={key} style={styles.contenDateProduct}>
+						<Button style={styles.productsButtonRunning} onPress={() => button_status == true ? navigation.navigate(route, route_params) : alert('Maaf anda tidak memiliki akses') }>
+							<View style={{flexDirection: 'row'}}>
+								<View style={{flexDirection: 'column', flex: 1}}>
+									<Text style={styles.fontButtonHeader}> {val.product_customer_part_number} </Text>   
+									<Text style={styles.fontButtonFooter}> {val.product_name} </Text>   
+								</View>
+								<View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
+									<Text style={styles.fontButtonFooter}> {val.product_internal_part_id} </Text>   
+								</View>
+								{
+									val.operator_status == 'Ready' ? 
+									<View style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}}>
+										<Image source={operators} style={{width: 35, height: 35}} />
+									</View> :
+									null 
+								}
+							</View>
+						</Button>
+					</View>
+				)
       })
     }else{
 			records.push(

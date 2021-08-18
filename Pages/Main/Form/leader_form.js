@@ -17,12 +17,16 @@ const leader_form = ({route, navigation}) => {
 	const [user_name, setUserName] 	      				= useState(null)
 	const [simpan_button, setSimpanButton] 	      = useState(null)
 	const [data, setData] 	              				= useState(null)
+	const [operator, setOperator] 	              = useState([])
 	const [mold_condition, setCondition] 					= useState(null)
 	const [loading, setLoading] 									= useState(false)
 	const [neeple_cooling, setCooling] 						= useState(null)
 	const [standard_part, setStandard] 						= useState(null)
 	const [data_categories, setCategories]				= useState(null)
 	const [operator_process, setOperatorProcess]	= useState([])
+	const [modal, setModal]												= useState(true)
+	const [modal_id, setModalId]												= useState(true)
+	const [input_id, setInputId]												= useState(true)
 	const [total_process, setTotalProcess]				= useState([])
 	const [created_by, setCreatedBy]		  				= useState("")
 	const [updated_by, setUpdatedBy]		  				= useState("")
@@ -108,10 +112,12 @@ const leader_form = ({route, navigation}) => {
 			user_id: user_id,
 			secproc_planning_product_item_id: secproc_planning_product_item_id
 		}
+		// console.log(params)
 		Axios.get(`${base_url}/api/v2/secprocs/new?`, {params: params, headers: headers})
 		.then(response => {
 			setLoading(true)
       setData(response.data.data)
+      setOperator(response.data.data.operator_list)
 			setCategories({id: response.data.data.category_process_by_product[0].id, name: response.data.data.category_process_by_product[0].name})
 			console.log(response.data.status)
 		})
@@ -135,6 +141,7 @@ const leader_form = ({route, navigation}) => {
 							color = 'black'
 						}
 					}
+					// console.log(val)
 					category_process.push(
 						// <View key={key} style={{flexDirection: 'row', marginTop: 5, borderWidth: 0.3, marginHorizontal: 2, paddingHorizontal: 5}}>
 							<TouchableOpacity key={key} style={{flexDirection: 'column', height: 50, justifyContent: 'center', borderWidth: 0.3, marginHorizontal: 2, paddingHorizontal: 5, backgroundColor: warna}} onPress={() => setCategories({id: val.id, name: val.name})}>
@@ -154,7 +161,7 @@ const leader_form = ({route, navigation}) => {
 			}
 		}
 		return (
-			<View key={'content'} style={{flexDirection: 'column'}}>
+			<ScrollView key={'content'} style={{flexDirection: 'column'}}>
 				<View style={{flexDirection: 'row', marginTop: 15, borderTopWidth: 0.3}}>
 					<View style={{flexDirection: 'column', alignItems: 'center', flex: 1}}>
 						<Text style={{fontWeight: 'bold'}}>Category Process</Text>
@@ -164,23 +171,32 @@ const leader_form = ({route, navigation}) => {
 					{category_process}
 				</View>
 				{funcContent()}
-				{
-					simpan_button ? 
-					<View style={{flexDirection: 'row', justifyContent: 'center'}}>
-						<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => submit()}><Text>Simpan</Text></Button>
-					</View> :
-					null
-				}
-			</View>
+			</ScrollView>
 		)
 	}
 
 	const funcContent = () => {
 		if(data_categories != null){
 			// console.log(data_categories)
+			var button_save = []
+			if(simpan_button){
+				button_save.push(
+					<View key={'but_sub'} style={{flexDirection: 'row', justifyContent: 'center'}}>
+						<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => submit()}><Text>Simpan</Text></Button>
+					</View>
+				)
+			}
+			var recomendation = []
+			if(modal == true){
+				recomendation.push(
+					<ScrollView key={'scrollView'} showsVerticalScrollIndicator={false}>
+						{recommendationFunction()}
+					</ScrollView>
+				)
+			}
 			if(data_categories.id == 1){
 				return (
-					<ScrollView style={{height: '52%'}}>
+					<View>
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Category Process</Text>
@@ -214,11 +230,15 @@ const leader_form = ({route, navigation}) => {
 
 						{listOperator()}
 
-					</ScrollView>
+						{recomendation}
+						
+						{button_save}
+
+					</View>
 				)
 			}else if(data_categories.id == 2){
 				return (
-					<ScrollView style={{height: '52%'}}>
+					<View>
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Category Process</Text>
@@ -251,11 +271,15 @@ const leader_form = ({route, navigation}) => {
 
 						{listOperator()}
 
-					</ScrollView>
+						{recomendation}
+						
+						{button_save}
+
+					</View>
 				)
 			}else if(data_categories.id == 3){
 				return (
-					<ScrollView style={{height: '52%'}}>
+					<View>
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Category Process</Text>
@@ -288,11 +312,15 @@ const leader_form = ({route, navigation}) => {
 						
 						{listOperator()}
 
-					</ScrollView>
+						{recomendation}
+						
+						{button_save}
+
+					</View>
 				)
 			}else if(data_categories.id == 4){
 				return (
-					<ScrollView style={{height: '52%'}}>
+					<View>
 						<View style={{flexDirection: 'row'}}>
 							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
 								<Text>Category Process</Text>
@@ -325,7 +353,11 @@ const leader_form = ({route, navigation}) => {
 						
 						{listOperator()}
 
-					</ScrollView>
+						{recomendation}
+						
+						{button_save}
+
+					</View>
 				)
 			}else{
 				
@@ -344,10 +376,54 @@ const leader_form = ({route, navigation}) => {
 			id: operator_process.length + 1,
 			category_process_id: value.id,
 			category_process_name: value.name,
-			hrd_employee_id: 0
+			hrd_employee_id: 0,
+			hrd_employee_name: null,
+			hrd_employee_nik: null
 		}])
 	}
 	
+	const [filtered, setFiltered] = useState(null)
+
+	const searchFunction = (val, key, id) => {
+		setModal(true)
+		setModalId(id)
+		setInputId(id)
+		if(val && modal == true){
+			const list = operator.filter(function (item) {
+				const text_data = val.toUpperCase()
+				const name			= item.name.toUpperCase().indexOf(text_data) >= 0
+				const nik	 			= item.nik.toUpperCase().indexOf(text_data) >= 0
+				return name || nik
+			})
+			setFiltered({key: key, list: list})
+		}else{
+			console.log('kosong')
+			setFiltered({key: key, list: []})
+		}
+	}
+
+	const recommendationFunction = () => {
+		var records = []
+		if(filtered != null){
+			// console.log(filtered.list)
+			if(filtered.list.length > 0){
+				filtered.list.map((v, k) => {
+					records.push(
+						<TouchableOpacity key={k} style={{borderRadius: 10, alignItems: 'flex-end', marginTop: 2, marginLeft: 45, marginRight: 5}} onPress={() => fillOperatorData(v, filtered.key, false)}>
+							<View style={{backgroundColor: '#adadad', width: '100%', padding: 4, flexDirection: 'row', justifyContent: 'space-between', borderRadius: 5}}>
+								<View>
+									<Text style={{fontWeight: 'bold', fontSize: 10, textTransform: 'uppercase'}}>{v.nik}</Text>
+									<Text style={{fontSize: 12, fontWeight: '600', letterSpacing: 1.2, textTransform: 'uppercase', marginTop: 5}}>{v.name}</Text>
+								</View>
+							</View>
+						</TouchableOpacity>
+					)
+				})
+			}
+		}
+		return records
+	}
+
 	const listOperator = () => {
 		var records = []
 		var iterasi = 1
@@ -362,9 +438,9 @@ const leader_form = ({route, navigation}) => {
 										<Text style={{fontSize: 15}}> {iterasi++} </Text>
 									</View>
 								</View>
-								<View style={{padding: 4, flex: 1}}>
+								<View style={{margin: 4, flex: 1}}>
 									<View style={{borderWidth: 0.5, borderRadius: 5, height: 40, justifyContent: 'center', paddingLeft: 5}}>
-										<Picker 
+										{/* <Picker 
 										mode="dropdown"
 										selectedValue={operator_process[key].hrd_employee_id}
 										onValueChange={(value) => fillOperatorData(value, key)}
@@ -372,7 +448,7 @@ const leader_form = ({route, navigation}) => {
 										itemTextStyle={{fontSize: 9}}
 										>
 											{loopingOperator()}
-										</Picker>
+										</Picker> */}
 										{/* <AutocompleteInput 
 											data={data != null ? data.operator_list : null}
 											value={operator_process[key].hrd_employee_id}
@@ -382,6 +458,8 @@ const leader_form = ({route, navigation}) => {
 												renderItem: ({ item }) => <Text>{item}</Text>,
 											}}
 										/> */}
+
+										<TextInput style={{color: 'black', fontSize: 13}} value={operator_process[key].hrd_employee_name} onChangeText={(value) => searchFunction(value, key, key+1)} placeholder='Search' />
 									</View>
 								</View>
 							</View>	
@@ -414,14 +492,19 @@ const leader_form = ({route, navigation}) => {
 		return record
 	}
 
-	const fillOperatorData = (el, key) => {
+	const fillOperatorData = (el, key, status) => {
+		console.log('in id: ', el)
+		console.log('in key: ', key)
 		let new_object	= [...operator_process]
-		new_object[key].hrd_employee_id = el
+		new_object[key].hrd_employee_id = el.id
+		new_object[key].hrd_employee_name = el.name
+		new_object[key].hrd_employee_nik = el.nik
 		setOperatorProcess(new_object)
+		setModal(status)
 	}
 
 	return(
-		<KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : "height"} style={{flex:1}}>
+		<KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS == "ios" ? "padding" : "height"}>
 			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 				<Container>
 					<View style={{flex: 1, height: 100, backgroundColor: '#dfe0df', borderWidth: 0.3, flexDirection: 'column'}}>

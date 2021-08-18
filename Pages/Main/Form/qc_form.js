@@ -41,6 +41,8 @@ const qc_form = ({route, navigation}) => {
 
 	const [index_image, setIndexImage]						= useState(0)
 	const [data, setData] 	              				= useState(null)
+
+	const [logic_ng, setLogicNG] 	              	= useState(null)
 	/**
 	 * Parameters
 	 */
@@ -161,7 +163,7 @@ const qc_form = ({route, navigation}) => {
 		if(val > 0){
 			setShift(val)
 		}
-		console.log(val)
+		// console.log(val)
 		const token = await AsyncStorage.getItem("key")
 		const user_id = await AsyncStorage.getItem('id')
 		const name = await AsyncStorage.getItem('name')
@@ -177,11 +179,12 @@ const qc_form = ({route, navigation}) => {
 			secproc_planning_product_item_id: secproc_planning_product_item_id,
 			shift: val > 1 ? val : default_shift
 		}
+		// console.log(params)
 		Axios.get(`${base_url}/api/v2/secprocs/new?`, {params: params, headers: headers})
 		// Axios.get('http://192.168.131.121:3000/api/v2/secprocs/new?', {params: params, headers: headers})
 		.then(response => {
 			setLoading(true)
-      // console.log(response.data.data.category_processes[0])
+      // console.log(response.data.data.aql_logic)
       setData(response.data.data)
       setCategories({id: response.data.data.category_processes[0].category_process_id, name: response.data.data.category_processes[0].category_process_name})
 			console.log(response.data.status)
@@ -283,10 +286,11 @@ const qc_form = ({route, navigation}) => {
 			}
 		}
 	}
-
+	
 	const AqlFunction = (val) => {
 		if(data != null){
 			if(data.aql_logic.length > 0){
+				// console.log(data.aql_logic)
 				setOutputProcess(val)
 				data.aql_logic.map((v, k) => {
 					if(val <= 1){
@@ -523,7 +527,80 @@ const qc_form = ({route, navigation}) => {
 	}
 
 	const funcContent = () => {
+
+		var add_ngs 				= []
+		var add_images 			= []
+		var button_submit 	= []
+		var note_unnormals 	= []
+		var inspection_time = []
 		if(data_categories != null){
+			var ng_summaries = 0
+
+			if(ng_details.length > 0){
+				ng_details.map((v, k) => {
+					ng_summaries += v.ng_quantity != null ? parseInt(v.ng_quantity) : 0
+				})
+			}
+
+			var simpan_button = true
+			if(ng_summaries <= appearance_pn){
+				add_ngs.push(
+					<View key='add_ngs' style={{flexDirection: 'row', justifyContent: 'center', borderTopWidth: 0.3}}>
+						<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
+					</View>
+				)
+			}else{
+				simpan_button = false
+				add_ngs.push(
+					<View key={'wkwkw'} style={{width: '100%', padding: 25, flexDirection: 'row', justifyContent: 'center'}}>
+						<View style={{justifyContent: 'center', height: 200, padding: 10, borderRadius: 10, backgroundColor: '#F3F2C9'}}>
+							<Text style={{textAlign: 'center', color: 'grey'}}>Jumlah NG Melebihi Nilai Appearance N Atau Jumlah NG Tidak Diinput</Text>
+						</View>
+					</View>
+				)
+			}
+			if(simpan_button){
+				if(index_image < 8){
+					add_images.push(
+						<View key='add_images' style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
+							<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
+						</View>
+					)
+				}
+			}
+
+			if(simpan_button){
+				note_unnormals.push(
+					<View key='add_unnormal' style={{flexDirection: 'row'}}>
+						<View style={{flexDirection: 'column', width: '40%', paddingHorizontal: 7, paddingTop: 12}}>
+							<Text>Note Unnormal</Text>
+						</View>
+						<View style={{flexDirection: 'column', paddingHorizontal: 7, paddingTop: 12}}>
+							<Text>:</Text>
+						</View>
+						<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+							<TextInput style={{color: 'black', fontSize: 13}} value={note_unnormal} onChangeText={(value) => setNotUnnomral(value)} />
+						</View>
+					</View>
+				)
+			}
+
+			if(simpan_button){
+				button_submit.push(
+					<View key='button_submit' style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
+						<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => submit()}><Text>Simpan</Text></Button>
+					</View>
+				)
+			}
+
+			if(inspectionTime != null){
+				inspection_time.push(
+					<View style={{flexDirection: 'row', justifyContent: 'center'}}>
+						<Text>{inspectionTime}</Text>
+					</View>
+				)
+			}
+
 			if(data_categories.id == 1){
 				return (
 					<ScrollView>
@@ -558,52 +635,19 @@ const qc_form = ({route, navigation}) => {
 
 						{listOperator()}
 						
-						<View style={{flexDirection: 'row', justifyContent: 'center', borderTopWidth: 0.3}}>
-							<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
-						</View>
+						{add_ngs}
 
 						{list_ng_category()}
 
-						{/* {
-							image_button ?  */}
-							{
-								index_image < 5 ?
-								<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
-									<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
-								</View> : 
-								null
-							}
+						{add_images}
 
 						{image_category()}
 					
+						{note_unnormals}
 
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', paddingHorizontal: 7, paddingTop: 12}}>
-								<Text>Note Unnormal</Text>
-							</View>
-							<View style={{flexDirection: 'column', paddingHorizontal: 7, paddingTop: 12}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-								<TextInput style={{color: 'black', fontSize: 13}} value={note_unnormal} onChangeText={(value) => setNotUnnomral(value)} />
-							</View>
-						</View>
-
-						{
-							inspectionTime != null ? 
-							<View style={{flexDirection: 'row', justifyContent: 'center'}}>
-								<Text>{inspectionTime}</Text>
-							</View>	:
-							null
-						}
-
-						{
-							simpan_button ? 
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
-								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => submit()}><Text>Simpan</Text></Button>
-							</View> :
-							null
-						}
+						{inspection_time}
+						
+						{button_submit}
 
 					</ScrollView>
 				)
@@ -641,53 +685,19 @@ const qc_form = ({route, navigation}) => {
 
 						{listOperator()}
 						
-						<View style={{flexDirection: 'row', justifyContent: 'center', borderTopWidth: 0.3}}>
-							<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
-						</View>
+						{add_ngs}
 
 						{list_ng_category()}
 
-						{/* {
-							image_button ?  */}
-							{
-								index_image < 5 ?
-								<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
-									<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
-								</View> :
-								null
-							}
+						{add_images}
 
 						{image_category()}
 					
+						{note_unnormals}
 
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7}}>
-								<Text>Note Unnormal</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-								<TextInput style={{color: 'black', fontSize: 13}} value={note_unnormal} onChangeText={(value) => setNotUnnomral(value)} />
-							</View>
-						</View>
-
-						{
-							inspectionTime != null ? 
-							<View style={{flexDirection: 'row', justifyContent: 'center'}}>
-								<Text>{inspectionTime}</Text>
-							</View>	:
-							null
-						}
-
-
-						{
-							simpan_button ? 
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
-								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => submit()}><Text>Simpan</Text></Button>
-							</View> :
-							null
-						}
+						{inspection_time}
+						
+						{button_submit}
 					</ScrollView>
 				)
 			}else if(data_categories.id == 3){
@@ -721,57 +731,22 @@ const qc_form = ({route, navigation}) => {
 								</View>
 							</View>
 						</View>
-						
+
 						{listOperator()}
 						
-						<View style={{flexDirection: 'row', justifyContent: 'center', borderTopWidth: 0.3}}>
-							<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
-						</View>
+						{add_ngs}
 
 						{list_ng_category()}
 
-						{/* {
-							image_button ?  */}
-							{
-								index_image < 5 ?
-								<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
-									<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
-								</View> :
-								null								
-							}
+						{add_images}
 
 						{image_category()}
 					
+						{note_unnormals}
 
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7}}>
-								<Text>Note Unnormal</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-								<TextInput style={{color: 'black', fontSize: 13}} value={note_unnormal} onChangeText={(value) => setNotUnnomral(value)} />
-							</View>
-						</View>
-
-						{
-							inspectionTime != null ? 
-							<View style={{flexDirection: 'row', justifyContent: 'center'}}>
-								<Text>{inspectionTime}</Text>
-							</View>	:
-							null
-						}
-
+						{inspection_time}
 						
-
-						{
-							simpan_button ? 
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
-								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => submit()}><Text>Simpan</Text></Button>
-							</View> :
-							null
-						}
+						{button_submit}
 					</ScrollView>
 				)
 			}else if(data_categories.id == 4){
@@ -806,56 +781,72 @@ const qc_form = ({route, navigation}) => {
 							</View>
 						</View>
 						
+
 						{listOperator()}
 						
-						<View style={{flexDirection: 'row', justifyContent: 'center', borderTopWidth: 0.3}}>
-							<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
-						</View>
+						{add_ngs}
 
 						{list_ng_category()}
 
-						{/* {
-							image_button ?  */}
-							{
-								index_image < 5 ?
-								<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
-									<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
-								</View> :
-								null
-							}
+						{add_images}
 
 						{image_category()}
 					
+						{note_unnormals}
+
+						{inspection_time}
+						
+						{button_submit}
+					</ScrollView>
+				)
+			}else{
+				return (
+					<ScrollView>
 
 						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7}}>
-								<Text>Note Unnormal</Text>
+							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
+								<Text>Category Process</Text>
 							</View>
-							<View style={{flexDirection: 'column', padding: 7}}>
+							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
 								<Text>:</Text>
 							</View>
-							<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-								<TextInput style={{color: 'black', fontSize: 13}} value={note_unnormal} onChangeText={(value) => setNotUnnomral(value)} />
+							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
+								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+									<Text style={{fontSize: 14}}>{data_categories.name}</Text>
+								</View>
 							</View>
 						</View>
 
-						{
-							inspectionTime != null ? 
-							<View style={{flexDirection: 'row', justifyContent: 'center'}}>
-								<Text>{inspectionTime}</Text>
-							</View>	:
-							null
-						}
-
+						<View style={{flexDirection: 'row'}}>
+							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
+								<Text>Leader Produksi</Text>
+							</View>
+							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
+								<Text>:</Text>
+							</View>
+							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
+								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+									<Text style={{fontSize: 14}}>{data != null ? data.leader_name : '-'}</Text>
+								</View>
+							</View>
+						</View>
 						
 
-						{
-							simpan_button ? 
-							<View style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20}}>
-								<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => submit()}><Text>Simpan</Text></Button>
-							</View> :
-							null
-						}
+						{listOperator()}
+						
+						{add_ngs}
+
+						{list_ng_category()}
+
+						{add_images}
+
+						{image_category()}
+					
+						{note_unnormals}
+
+						{inspection_time}
+						
+						{button_submit}
 					</ScrollView>
 				)
 			}
@@ -881,7 +872,7 @@ const qc_form = ({route, navigation}) => {
 											</View>
 											<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
 												<View style={{borderWidth: 1, borderRadius: 5, backgroundColor: '#b8b8b8', height: 40, justifyContent: 'center', paddingLeft: 5}}>
-													<Text>{v.operator_name}</Text>
+													<Text style={{fontSize: 14}}>{v.operator_name}</Text>
 												</View>
 											</View>
 										</View>
@@ -897,7 +888,7 @@ const qc_form = ({route, navigation}) => {
 											</View>
 											<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
 												<View style={{borderWidth: 1, borderRadius: 5, backgroundColor: '#b8b8b8', height: 40, justifyContent: 'center', paddingLeft: 5}}>
-													<Text>{v.operator_name}</Text>
+													<Text style={{fontSize: 14}}>{v.operator_name}</Text>
 												</View>
 											</View>
 										</View>
@@ -913,7 +904,6 @@ const qc_form = ({route, navigation}) => {
 	}
 
 	const checkNGDetails = (value) => {
-		setSimpanButton(true)
 		setNGDetails([...ng_details, {
 			id: ng_details.length + 1,
 			category_process_id: value.id,
@@ -943,7 +933,7 @@ const qc_form = ({route, navigation}) => {
 		if(data != null){
 			if(data.category_processes.length > 0){
 				data.category_processes.map((v, k) => {
-					console.log(v.defect_categories)
+					// console.log(v.defect_categories)
 					if(v.defect_categories.length > 0){
 						v.defect_categories.map((el, key) => {
 							if(v.category_process_id == data_categories.id){
