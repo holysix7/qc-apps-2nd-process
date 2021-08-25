@@ -1,36 +1,28 @@
 import {View, ScrollView, ActivityIndicator, Image, Alert, RefreshControl} from 'react-native';
-import React, {useState, useEffect, useCallback } from 'react';
+import React, {useState, useEffect} from 'react';
 import { Container, Text, Button, Picker} from 'native-base';
-// import GeneralStatusBarColor from '../Styles/GeneralStatusBarColor';
 import styles from '../Styles/Styling'
 import Home from '../Assets/FixHomeWhite.png'
 import Profile from '../Assets/FixProfileWhite.png'
-import Cog from '../Assets/FixCogWhite.png'
-import CalendarBlack from '../Assets/calendar.png'
 import CalendarWhite from '../Assets/calendarWhite.png'
 import AsyncStorage from "@react-native-community/async-storage";
 import axios from 'axios';
 import app_version from '../System/app_version';
-import app_name from '../System/app_name';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { forHorizontalIOS } from '@react-navigation/stack/lib/typescript/src/TransitionConfigs/CardStyleInterpolators';
 import base_url from '../System/base_url'
 
 const Main = ({navigation}) => {
   
-  const [cekId, setCekId]             = useState(null);
-  const [user_id, setUserId]          = useState(null);
-  const [name, setCekName]            = useState("");
-  const [deptName, setCekDeptName]    = useState("");
-  const [versionIQC, setVersionIQC]   = useState(null);
-  const [featureUser, setFeature]     = useState([]);
-  const [userNik, setUserNik]         = useState(null);
-  const [dutyId, setDutyId]           = useState([]);
-  const [loading, setLoading]         = useState(false);
-  const [data, setData]               = useState([]);
-  const [dummyData, setDummyData]     = useState([]);
-  const [refreshing, setRefreshing]   = useState(false);
-
+  const [cekId, setCekId]                             = useState(null);
+  const [user_id, setUserId]                          = useState(null);
+  const [employees_image, setEmployeesImage]          = useState(null);
+  const [name, setCekName]                            = useState("");
+  const [deptName, setCekDeptName]                    = useState("");
+  const [userNik, setUserNik]                         = useState(null);
+  const [dutyId, setDutyId]                           = useState([]);
+  const [loading, setLoading]                         = useState(false);
+  const [data, setData]                               = useState([]);
+  const [refreshing, setRefreshing]                   = useState(false);
+  
   useEffect(() => {
     session()
   }, [])
@@ -45,19 +37,16 @@ const Main = ({navigation}) => {
       'Authorization': token
     }
     const params = {
-      // tbl: 'machine',
-      // kind: 'machine',
       sys_plant_id: value,
       user_id: user_id,
       app_version: app_version
     }
     axios.get(`${base_url}/api/v2/secprocs?`, {params: params, headers: headers})
-    // axios.get('http://192.168.131.121:3000/api/v2/secprocs?', {params: params, headers: headers})
     .then(response => {
       setLoading(true)
       setData(response.data.data)
       setRefreshing(false)
-      console.log("Machines List Data: ", response.data.status, "OK")
+      console.log("List Lines Data: ", response.data.status, "OK")
     })
     .catch(error => {
       console.log(error)
@@ -67,7 +56,6 @@ const Main = ({navigation}) => {
         "Silahkan Login Kembali",
         [
           { text: "OK", onPress: () => logout() }
-          // { text: "OK", onPress: () => console.log('logout boiys') }
         ],
         { cancelable: false }
       );
@@ -90,15 +78,13 @@ const Main = ({navigation}) => {
       const deptName              = await AsyncStorage.getItem('department_name')
       const name                  = await AsyncStorage.getItem('name')
       const user                  = await AsyncStorage.getItem('user')
-      const feature               = await AsyncStorage.getItem('feature')
-      const current_version_iqc   = await AsyncStorage.getItem('current_version_iqc')
-      setDutyId(JSON.parse(duty))
+      const employees_image       = await AsyncStorage.getItem('employee_image_base64')
+      setEmployeesImage(employees_image == 0 ? null : employees_image)
+      setDutyId(duty != null ? JSON.parse(duty) : [])
       setCekId(sys_plant_id)
       setUserNik(user)
       setCekDeptName(deptName)
       setCekName(name)
-      setVersionIQC(current_version_iqc)
-      setFeature(JSON.parse(feature))
       lines(sys_plant_id)
     } catch (error) {
       console.log('Multi Get Error: ', error.message)
@@ -113,27 +99,6 @@ const Main = ({navigation}) => {
           <Picker.Item label={element.plant_name} value={element.plant_id} key={key} />
         )
       })
-    }else{
-      var dummy = [
-        {
-          plant_id: 1,
-          plant_name: 'PT TSSI' 
-        },
-        {
-          plant_id: 2,
-          plant_name: 'PT Techno KB' 
-        },
-        {
-          plant_id: 3,
-          plant_name: 'PT Techno DPIL' 
-        },
-      ]
-      dummy.map((el, key) => {
-        records.push(
-          <Picker.Item label={el.plant_name} value={el.plant_id} key={key} />
-        )
-      })
-      console.log("plantId = Kosong")
     }
     return records
   }
@@ -144,7 +109,7 @@ const Main = ({navigation}) => {
       if(data.length > 0){
         data.map(element => {
           records.push(
-            <Button key={element.id} style={styles.machineLoaded}
+            <Button key={element.id} style={{backgroundColor: '#1a508b', marginTop: 5, marginVertical: 2, marginHorizontal: 3, height: 45, width: "23%", borderRadius: 5}}
             onPress={() => {
               navigation.navigate('ShowProducts', {
                 line_id: element.id,
@@ -156,131 +121,22 @@ const Main = ({navigation}) => {
               })
             }}
             >
-              <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
-                <View style={{flexDirection: 'column'}}>
-                  <Text style={styles.putihBold}>{element.number}</Text> 
+              <View style={{flexDirection: 'column', alignItems: 'center', flex: 1}}>
+                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
+                  <View style={{flexDirection: 'column'}}>
+                    <Text style={{fontSize: 10}}>{element.name}</Text> 
+                  </View>
                 </View>
               </View>
-              <Text style={{fontSize: 6}}>{element.name}</Text>
+              {
+                element.planning_status == 'Ready' ?
+                <View style={{flexDirection: 'column', paddingRight: 5}}>
+                  <Image source={CalendarWhite} style={{width: 20, height: 20}} /> 
+                </View> :
+                null
+              }
             </Button>
           )
-          // if(element.status == 'loaded'){
-          //   machines.push(
-          //     <Button key={element.id} style={styles.machineLoaded}
-          //     onPress={() => {
-          //       navigation.navigate('ShowProducts', {
-          //         machine_id: element.id,
-          //         machine_name: element.name,
-          //         machine_number: element.number,
-          //         sys_plant_id: element.sys_plant_id,
-          //       })
-          //     }}
-          //     >
-          //       <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
-          //         <View style={{flexDirection: 'column'}}>
-          //           <Text style={styles.putihBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
-          //         </View>
-          //         <View style={{flexDirection: 'column'}}>
-          //           {element.product_id != null ? <Image source={CalendarWhite} style={{width: 20, height: 20}} /> : null}
-          //         </View>
-          //       </View>
-          //       <Text style={{fontSize: 6}}>{element.name}</Text>
-          //     </Button>
-          //   )
-          // }else if(element.status == 'no_load'){
-          //   machines.push(
-          //     <Button key={element.id} style={styles.machineNoLoad}
-          //     onPress={() => {
-          //       navigation.navigate('ShowProducts', {
-          //         machine_id: element.id,
-          //         machine_name: element.name,
-          //         machine_number: element.number,
-          //         sys_plant_id: element.sys_plant_id,
-          //       })
-          //     }}
-          //     >
-          //       <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
-          //         <View style={{flexDirection: 'column'}}>
-          //           <Text style={styles.hitamBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
-          //         </View>
-          //         <View style={{flexDirection: 'column'}}>
-          //           {element.product_id != null ? <Image source={CalendarBlack} style={{width: 20, height: 20}} /> : null}
-          //         </View>
-          //       </View>
-          //       <Text style={{fontSize: 6, color: 'black'}}>{element.name}</Text>
-          //     </Button>
-          //   )
-          // }else if(element.status == 'broken'){
-          //   machines.push(
-          //     <Button key={element.id} style={styles.machineBroken}
-          //     onPress={() => {
-          //       navigation.navigate('ShowProducts', {
-          //         machine_id: element.id,
-          //         machine_name: element.name,
-          //         machine_number: element.number,
-          //         sys_plant_id: element.sys_plant_id,
-          //       })
-          //     }}
-          //     >
-          //       <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
-          //         <View style={{flexDirection: 'column'}}>
-          //           <Text style={styles.hitamBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
-          //         </View>
-          //         <View style={{flexDirection: 'column'}}>
-          //           {element.product_id != null ? <Image source={CalendarBlack} style={{width: 20, height: 20}} /> : null}
-          //         </View>
-          //       </View>
-          //       <Text style={{fontSize: 6, color: 'black'}}>{element.name}</Text>
-          //     </Button>
-          //   )
-          // }else if(element.status == 'maintenance'){
-          //   machines.push(
-          //     <Button key={element.id} style={styles.machineMaintenance}
-          //     onPress={() => {
-          //       navigation.navigate('ShowProducts', {
-          //         machine_id: element.id,
-          //         machine_name: element.name,
-          //         machine_number: element.number,
-          //         sys_plant_id: element.sys_plant_id,
-          //       })
-          //     }}
-          //     >
-          //       <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
-          //         <View style={{flexDirection: 'column'}}>
-          //           <Text style={styles.hitamBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
-          //         </View>
-          //         <View style={{flexDirection: 'column'}}>
-          //           {element.product_id != null ? <Image source={CalendarBlack} style={{width: 20, height: 20}} /> : null}
-          //         </View>
-          //       </View>
-          //       <Text style={{fontSize: 6, color: 'black'}}>{element.name}</Text>
-          //     </Button>
-          //   )
-    
-          // }else{
-          //   machines.push(
-          //     <Button key={element.id} style={styles.machineElse}
-          //     onPress={() => {
-          //       navigation.navigate('ShowProducts', {
-          //         machine_id: element.id,
-          //         machine_name: element.name,
-          //         machine_number: element.number,
-          //         sys_plant_id: element.sys_plant_id,
-          //       })
-          //     }}
-          //     >
-          //       <View style={{flexDirection: 'row', flex: 1, width: "100%", justifyContent: 'center'}}>
-          //         <View style={{flexDirection: 'column'}}>
-          //           <Text style={styles.putihBold}>{element.product_lot_out == true ? <Text style={styles.asterixMerah}>*</Text> : null} {element.number}</Text> 
-          //         </View>
-          //         <View style={{flexDirection: 'column'}}>
-          //           {element.product_id != null ? <Image source={CalendarWhite} style={{width: 20, height: 20}} /> : null}
-          //         </View>
-          //       </View>
-          //       <Text style={{fontSize: 6}}>{element.name}</Text>
-          //     </Button>
-          //   )
-          // }
         });
       }else{
         records.push(
@@ -301,14 +157,14 @@ const Main = ({navigation}) => {
         <Button style={styles.buttonNavbar}>
           <Image source={Home} style={styles.homeButton}/>
         </Button>
-        {/* </Button> */}
 
         <Button style={styles.buttonNavbar} onPress={() => {
           navigation.navigate('Profile', {
             name: name,
-            deptName: deptName,
-            dutyId: dutyId,
-            userNik: userNik
+            dept_name: deptName,
+            duty_id: dutyId,
+            user_nik: userNik,
+            user_image: employees_image
           })
         }}>
           <Image source={Profile} style={styles.profileButton}/>
@@ -322,7 +178,7 @@ const Main = ({navigation}) => {
       <View>
         <View style={{borderBottomWidth: 1, borderColor: 'gray', padding: 5, paddingLeft: 20,  backgroundColor: '#19456b'}}>
           <View style={{height: 35, justifyContent: 'center', alignItems: 'center'}} >
-            <Text style={{color: 'white'}}>LIST MACHINES</Text>
+            <Text style={{color: 'white'}}>LIST LINES</Text>
           </View>
         </View>
       </View>
@@ -331,9 +187,7 @@ const Main = ({navigation}) => {
   
   const onRefresh = () => {
     setLoading(false)
-    setInterval(() => {
-      setLoading(true)
-    }, 2000);
+    lines(cekId)
   }
 
   return (
@@ -408,7 +262,7 @@ const Main = ({navigation}) => {
                 <View style={{flexDirection: 'row', paddingVertical: 1}}>
                 </View>
                 <View style={{flexDirection: 'row', paddingVertical: 1}}>
-                  <Image source={CalendarBlack} style={{width: 20, height: 20, marginLeft: 4 }} />
+                  <Image source={CalendarWhite} style={{width: 20, height: 20, marginLeft: 4 }} />
                   <View style={{justifyContent: 'center'}}>
                     <Text style={{fontWeight: 'bold', fontSize: 8}}>: Terdapat Planning</Text>
                   </View>
@@ -432,7 +286,6 @@ const Main = ({navigation}) => {
           </View> : null }
         </ScrollView>
       </View>
-      {/* {userNik != null ? buttonNavbar() : <View style={{flex: 1, height: 500, justifyContent: 'center'}}><ActivityIndicator size="large" color="#0000ff"/></View> } */}
       {userNik != null ? buttonNavbar() : null }
     </Container>
   ) 

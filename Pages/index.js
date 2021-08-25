@@ -7,8 +7,9 @@ import Login from './Auth/Login';
 import Profile from './Auth/Profile';
 import Main from './Main';
 import ShowProducts from './Main/show_products';
-import LeaderForm from './Main/Form/leader_form';
-import QCForm from './Main/Form/qc_form';
+import LeaderForm from './Main/Form/Leader/leader_form';
+import LeaderFormShow from './Main/Form/Leader/leader_form_show';
+import QCForm from './Main/Form/QC/qc_form';
 
 export {
   SplashScreen,
@@ -17,6 +18,7 @@ export {
   Main,
   ShowProducts,
   LeaderForm,
+  LeaderFormShow,
   QCForm,
   Profile
 }

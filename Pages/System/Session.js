@@ -8,9 +8,9 @@ const Session = async(data) => {
         ['hrd_employee_id', JSON.stringify(data.hrd_employee_id)], 
         ['sys_department_id', JSON.stringify(data.sys_department_id)], 
         ['sys_plant_id', JSON.stringify(data.sys_plant_id)], 
-        ['employee_image_id', JSON.stringify(data.employee_image_id)], 
+        ['employee_image_id', data.employee_image_id != null ? JSON.stringify(data.employee_image_id) : '0'], 
         ['department_name', data.department_name],
-        ['employee_image_base64', data.employee_image_base64],
+        ['employee_image_base64', data.employee_image_base64 != null ? data.employee_image_base64 : '0'],
         ['duty_plant_option_select', JSON.stringify(data.duty_plant_option_select)], 
         ['feature', JSON.stringify(data.feature)]
     ]

@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-community/async-storage";
 
 const DeviceStorage = async(data) => {
+	// console.log('ini token: ', data)
 	const value = data
 		try {
 			await AsyncStorage.setItem('key', value);

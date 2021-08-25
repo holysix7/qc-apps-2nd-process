@@ -81,11 +81,9 @@ const Login = ({navigation}) => {
 			registration_ids
 		}
 		Axios.post(`${base_url}/signin`, data)
-		// Axios.post(`http://192.168.131.121:3000/signin`, data)
 		.then(res => {
       if(res.data.data != null){
         setLoading(true)
-				// console.log(res.data)
         DeviceStorage(res.data.data.token)
 				Session(res.data.data)
 				navigation.replace('Main')
@@ -96,7 +94,6 @@ const Login = ({navigation}) => {
           "Login Gagal, Username dan Password tidak cocok",
           [
             { text: "OK", onPress: () => console.log("Submitted") }
-            // { text: "OK", onPress: () => BackHandler.exitApp() }
           ],
           { cancelable: false }
         );

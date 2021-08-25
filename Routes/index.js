@@ -7,6 +7,7 @@ import {
 	Main,
 	ShowProducts,
 	LeaderForm,
+	LeaderFormShow,
 	QCForm,
 	Profile
 } from '../Pages'
@@ -28,6 +29,7 @@ const Routes = () => {
 			<Stack.Screen name="Main" component={Main} />
 			<Stack.Screen name="ShowProducts" component={ShowProducts} />
 			<Stack.Screen name="LeaderForm" component={LeaderForm} />
+			<Stack.Screen name="LeaderFormShow" component={LeaderFormShow} />
 			<Stack.Screen name="QCForm" component={QCForm} />
 			<Stack.Screen name="Profile" component={Profile} />
     </Stack.Navigator>  

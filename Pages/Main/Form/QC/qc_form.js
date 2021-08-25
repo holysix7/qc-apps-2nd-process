@@ -1,17 +1,18 @@
 import {Image, View, TextInput, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, ScrollView, ActivityIndicator, Alert, VirtualizedList, TouchableOpacity} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import { Container, Text, Button, Picker } from 'native-base';
-import LogoSIP from '../../Assets/logo-sip370x50.png';
-import cameraicon from '../../Assets/cameraicon.png';
+import LogoSIP from '../../../Assets/logo-sip370x50.png';
+import cameraicon from '../../../Assets/cameraicon.png';
+import sampah from '../../../Assets/tong-sampah.png';
 import AsyncStorage from "@react-native-community/async-storage";
 import Axios from 'axios';
 import moment from 'moment';
-import app_version from	'../../System/app_version';
-import base_url from	'../../System/base_url';
+import app_version from	'../../../System/app_version';
+import base_url from	'../../../System/base_url';
 import {launchCamera} from 'react-native-image-picker';
 
 const qc_form = ({route, navigation}) => {
-  const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name, default_shift} = route.params
+  const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name, default_shift, dept_name} = route.params
 	useEffect(() => {
 		get_data()		
 		// setInterval(() => {
@@ -37,38 +38,35 @@ const qc_form = ({route, navigation}) => {
 			}, 1000);
 		}
 	}, [])
-	const [simpan_button, setSimpanButton] 	      = useState(null)
 
 	const [index_image, setIndexImage]						= useState(0)
 	const [data, setData] 	              				= useState(null)
-
-	const [logic_ng, setLogicNG] 	              	= useState(null)
+	const [simpan_button, setSimpanButton] 	      = useState(null)
 	/**
 	 * Parameters
 	 */
-	const [shift, setShift] 											= useState(default_shift)
-	const [judgement_1st_piece, setJudgement] 		= useState(null)
-	const [output_process, setOutputProcess] 			= useState(null)
-	const [appearance_pn, setAppearancePN] 				= useState(null)
-	const [appearance_n, setAppearanceN] 				  = useState(null)
-	const [check_packing, setCheckPacking] 				= useState(null)
-	const [check_label, setCheckLabel] 						= useState(null)
-	const [final_judgement, setFinalJudgement] 		= useState(null)
-	const [note_unnormal, setNotUnnomral] 				= useState(null)
-	const [inspectionTime, setInspectionTime] 		= useState(null)
+	const [shift, setShift] 													= useState(default_shift)
+	const [judgement_1st_piece, setJudgement] 				= useState(null)
+	const [output_process, setOutputProcess] 					= useState(null)
+	const [appearance_pn, setAppearancePN] 						= useState(null)
+	const [appearance_n, setAppearanceN] 				  		= useState(null)
+	const [check_packing, setCheckPacking] 						= useState(null)
+	const [check_label, setCheckLabel] 								= useState(null)
+	const [final_judgement, setFinalJudgement] 				= useState(null)
+	const [note_unnormal, setNotUnnomral] 						= useState(null)
+	const [inspectionTime, setInspectionTime] 				= useState(null)
 
-	const [loading, setLoading] 									= useState(false)
-	const [data_categories, setCategories]				= useState(null)
-	const [ng_details, setNGDetails]							= useState([])
-	const [category_processes, setCategoryProcesses]				= useState([])
-	let date 																			= moment().format("YYYY-MM-DD")
-	var new_shift = default_shift + 'abc'
-	// console.log('default: ', default_shift)
+	const [loading, setLoading] 											= useState(false)
+	const [data_categories, setCategories]						= useState(null)
+	const [ng_details, setNGDetails]									= useState([])
+	const [category_processes, setCategoryProcesses]	= useState([])
+	let date 																					= moment().format("YYYY-MM-DD")
 
 	const submit = async() => {
 		setLoading(false)
 		const user_id = await AsyncStorage.getItem('id')
 		const token = await AsyncStorage.getItem("key")
+		var check_appearance_pn = appearance_pn == null || appearance_pn.length == 0 ? 0 : appearance_pn
 		var body = {
 			sys_plant_id: sys_plant_id,
 			app_version: app_version,
@@ -79,7 +77,7 @@ const qc_form = ({route, navigation}) => {
 			hour: data != null ? data.current_hour != null ? data.current_hour : null : null,
 			judgement_1st_piece: judgement_1st_piece,
 			output_process: output_process,
-			check_appearance_pn: appearance_pn,
+			check_appearance_pn: check_appearance_pn,
 			check_packing: check_packing, 
 			check_label: check_label, 
 			final_judgement: final_judgement, 
@@ -88,7 +86,7 @@ const qc_form = ({route, navigation}) => {
 			category_processes: category_processes, 
 			ng_details: ng_details
 		}
-		// console.log(body)
+		console.log(check_appearance_pn)
 		var config = {
 			method: 'post',
 			url: `${base_url}/api/v2/secprocs`,
@@ -181,10 +179,8 @@ const qc_form = ({route, navigation}) => {
 		}
 		// console.log(params)
 		Axios.get(`${base_url}/api/v2/secprocs/new?`, {params: params, headers: headers})
-		// Axios.get('http://192.168.131.121:3000/api/v2/secprocs/new?', {params: params, headers: headers})
 		.then(response => {
 			setLoading(true)
-      // console.log(response.data.data.aql_logic)
       setData(response.data.data)
       setCategories({id: response.data.data.category_processes[0].category_process_id, name: response.data.data.category_processes[0].category_process_name})
 			console.log(response.data.status)
@@ -543,18 +539,21 @@ const qc_form = ({route, navigation}) => {
 			}
 
 			var simpan_button = true
-			if(ng_summaries <= appearance_pn){
-				add_ngs.push(
-					<View key='add_ngs' style={{flexDirection: 'row', justifyContent: 'center', borderTopWidth: 0.3}}>
-						<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
-					</View>
-				)
+			var nilai_pn = appearance_pn == null ? 0 : appearance_pn
+			if(ng_summaries <= nilai_pn){
+				if(ng_summaries < appearance_pn){
+					add_ngs.push(
+						<View key='add_ngs' style={{flexDirection: 'row', justifyContent: 'center'}}>
+							<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
+						</View>
+					)
+				}
 			}else{
 				simpan_button = false
 				add_ngs.push(
 					<View key={'wkwkw'} style={{width: '100%', padding: 25, flexDirection: 'row', justifyContent: 'center'}}>
 						<View style={{justifyContent: 'center', height: 200, padding: 10, borderRadius: 10, backgroundColor: '#F3F2C9'}}>
-							<Text style={{textAlign: 'center', color: 'grey'}}>Jumlah NG Melebihi Nilai Appearance N Atau Jumlah NG Tidak Diinput</Text>
+							<Text style={{textAlign: 'center', color: 'grey'}}>Jumlah NG Melebihi Nilai Appearance N Atau Jumlah NG Tidak Diinput Maka Form Check Sheet tidak bisa disimpan </Text>
 						</View>
 					</View>
 				)
@@ -595,261 +594,68 @@ const qc_form = ({route, navigation}) => {
 
 			if(inspectionTime != null){
 				inspection_time.push(
-					<View style={{flexDirection: 'row', justifyContent: 'center'}}>
+					<View key={'inpection_time'} style={{flexDirection: 'row', justifyContent: 'center'}}>
 						<Text>{inspectionTime}</Text>
 					</View>
 				)
 			}
 
-			if(data_categories.id == 1){
-				return (
-					<ScrollView>
+			return (
+				<ScrollView>
 
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Category Process</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data_categories.name}</Text>
-								</View>
+					<View style={{flexDirection: 'row'}}>
+						<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
+							<Text>Category Process</Text>
+						</View>
+						<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
+							<Text>:</Text>
+						</View>
+						<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
+							<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+								<Text style={{fontSize: 14}}>{data_categories != null ? data_categories.name : '-'}</Text>
 							</View>
 						</View>
+					</View>
 
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Leader Produksi</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data != null ? data.leader_name : '-'}</Text>
-								</View>
+					<View style={{flexDirection: 'row'}}>
+						<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
+							<Text>Leader Produksi</Text>
+						</View>
+						<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
+							<Text>:</Text>
+						</View>
+						<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
+							<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+								<Text style={{fontSize: 14}}>{data != null ? data.leader_name : '-'}</Text>
 							</View>
 						</View>
+					</View>
 
-						{listOperator()}
-						
-						{add_ngs}
+					{listOperator()}
 
-						{list_ng_category()}
+					<View style={{flexDirection: 'row'}}>
+						<View style={{flexDirection: 'column', flex: 1, backgroundColor: '#dfe0df', height: 10, borderBottomWidth: 0.3, padding: 7, justifyContent: 'center'}}>
+							<Text style={{color: '#dfe0df'}}>Leader Produksi</Text>
+						</View>
+					</View>
 
-						{add_images}
+					{add_ngs}
 
-						{image_category()}
 					
-						{note_unnormals}
+					{list_ng_category()}
 
-						{inspection_time}
-						
-						{button_submit}
+					{add_images}
 
-					</ScrollView>
-				)
-			}else if(data_categories.id == 2){
-				return (
-					<ScrollView>
+					{image_category()}
+				
+					{note_unnormals}
 
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Category Process</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data_categories.name}</Text>
-								</View>
-							</View>
-						</View>
-
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Leader Produksi</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data != null ? data.leader_name : '-'}</Text>
-								</View>
-							</View>
-						</View>
-
-						{listOperator()}
-						
-						{add_ngs}
-
-						{list_ng_category()}
-
-						{add_images}
-
-						{image_category()}
+					{inspection_time}
 					
-						{note_unnormals}
+					{button_submit}
 
-						{inspection_time}
-						
-						{button_submit}
-					</ScrollView>
-				)
-			}else if(data_categories.id == 3){
-				return (
-					<ScrollView>
-
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Category Process</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data_categories.name}</Text>
-								</View>
-							</View>
-						</View>
-
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Leader Produksi</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data != null ? data.leader_name : '-'}</Text>
-								</View>
-							</View>
-						</View>
-
-						{listOperator()}
-						
-						{add_ngs}
-
-						{list_ng_category()}
-
-						{add_images}
-
-						{image_category()}
-					
-						{note_unnormals}
-
-						{inspection_time}
-						
-						{button_submit}
-					</ScrollView>
-				)
-			}else if(data_categories.id == 4){
-				return (
-					<ScrollView>
-
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Category Process</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data_categories.name}</Text>
-								</View>
-							</View>
-						</View>
-
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Leader Produksi</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data != null ? data.leader_name : '-'}</Text>
-								</View>
-							</View>
-						</View>
-						
-
-						{listOperator()}
-						
-						{add_ngs}
-
-						{list_ng_category()}
-
-						{add_images}
-
-						{image_category()}
-					
-						{note_unnormals}
-
-						{inspection_time}
-						
-						{button_submit}
-					</ScrollView>
-				)
-			}else{
-				return (
-					<ScrollView>
-
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Category Process</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data_categories.name}</Text>
-								</View>
-							</View>
-						</View>
-
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Leader Produksi</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data != null ? data.leader_name : '-'}</Text>
-								</View>
-							</View>
-						</View>
-						
-
-						{listOperator()}
-						
-						{add_ngs}
-
-						{list_ng_category()}
-
-						{add_images}
-
-						{image_category()}
-					
-						{note_unnormals}
-
-						{inspection_time}
-						
-						{button_submit}
-					</ScrollView>
-				)
-			}
+				</ScrollView>
+			)
 		}
 	}
 
@@ -933,7 +739,6 @@ const qc_form = ({route, navigation}) => {
 		if(data != null){
 			if(data.category_processes.length > 0){
 				data.category_processes.map((v, k) => {
-					// console.log(v.defect_categories)
 					if(v.defect_categories.length > 0){
 						v.defect_categories.map((el, key) => {
 							if(v.category_process_id == data_categories.id){
@@ -979,6 +784,11 @@ const qc_form = ({route, navigation}) => {
 								<View style={{flexDirection: 'column', margin: 7, justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, width: '30%'}}>
 									<TextInput style={{color: 'black', fontSize: 13}} value={ng_details[key].ng_quantity != null ? ng_details[key].ng_quantity : null} placeholder='0' onChangeText={(value) => fillNGCategory(value, key, 'qty')} keyboardType='number-pad' />
 								</View>
+								<View style={{margin: 4, width: '10%'}} >
+									<TouchableOpacity onPress={() => deleteItem(ng_details[key].id) }>
+										<Image source={sampah} style={{backgroundColor: 'red', borderRadius: 5, height: 40, width: 40}} />
+									</TouchableOpacity>
+								</View>
 							</View>	
 						)
 					}
@@ -1014,6 +824,11 @@ const qc_form = ({route, navigation}) => {
 			})
 		}
 		return records
+	}
+	
+	const deleteItem = (el) => {
+		setSimpanButton(true)
+		setNGDetails(ng_details.filter(item => item.id == el ? null : item.id))
 	}
 	
 	const fillNGCategory = (val, key, type) => {

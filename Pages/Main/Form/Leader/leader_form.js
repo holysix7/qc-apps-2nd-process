@@ -1,12 +1,13 @@
 import {Image, View, TextInput, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, ScrollView, ActivityIndicator, Alert, VirtualizedList, TouchableOpacity} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import { Container, Text, Button, Picker } from 'native-base';
-import LogoSIP from '../../Assets/logo-sip370x50.png';
+import LogoSIP from '../../../Assets/logo-sip370x50.png';
+import sampah from '../../../Assets/tong-sampah.png';
 import AsyncStorage from "@react-native-community/async-storage";
 import Axios from 'axios';
 import moment from 'moment';
-import app_version from	'../../System/app_version';
-import base_url from	'../../System/base_url';
+import app_version from	'../../../System/app_version';
+import base_url from	'../../../System/base_url';
 import AutocompleteInput from 'react-native-autocomplete-input';
 
 const leader_form = ({route, navigation}) => {
@@ -18,24 +19,13 @@ const leader_form = ({route, navigation}) => {
 	const [simpan_button, setSimpanButton] 	      = useState(null)
 	const [data, setData] 	              				= useState(null)
 	const [operator, setOperator] 	              = useState([])
-	const [mold_condition, setCondition] 					= useState(null)
 	const [loading, setLoading] 									= useState(false)
-	const [neeple_cooling, setCooling] 						= useState(null)
-	const [standard_part, setStandard] 						= useState(null)
 	const [data_categories, setCategories]				= useState(null)
-	const [operator_process, setOperatorProcess]	= useState([])
 	const [modal, setModal]												= useState(true)
-	const [modal_id, setModalId]												= useState(true)
-	const [input_id, setInputId]												= useState(true)
+	const [filtered, setFiltered] 								= useState(null)
+	const [operator_process, setOperatorProcess]	= useState([])
 	const [total_process, setTotalProcess]				= useState([])
-	const [created_by, setCreatedBy]		  				= useState("")
-	const [updated_by, setUpdatedBy]		  				= useState("")
-	const [tooling, setTooling]		  							= useState(null)
-	const [planningId, setPlanningId]		  				= useState("")
 	let date 																			= moment().format("YYYY-MM-DD")
-	let created_at 																= moment().format("YYYY-MM-DD HH:mm:ss")
-	let updated_at 																= moment().format("YYYY-MM-DD HH:mm:ss")
-	const planning_id = parseInt(planningId)
 
 	const submit = async() => {
 		setLoading(false)
@@ -99,8 +89,6 @@ const leader_form = ({route, navigation}) => {
 		const token = await AsyncStorage.getItem("key")
 		const user_id = await AsyncStorage.getItem('id')
 		const name = await AsyncStorage.getItem('name')
-		setCreatedBy(user_id)
-		setUpdatedBy(user_id)
 		setUserName(name)
 		const headers = {
 			'Authorization': token
@@ -108,11 +96,11 @@ const leader_form = ({route, navigation}) => {
 		const params = {
 			tbl: 'planning_pic_product',
 			app_version: app_version,
-			sys_plant_id: sys_plant_id,
+			sys_plant_id: 2,
 			user_id: user_id,
 			secproc_planning_product_item_id: secproc_planning_product_item_id
 		}
-		// console.log(params)
+		console.log(params)
 		Axios.get(`${base_url}/api/v2/secprocs/new?`, {params: params, headers: headers})
 		.then(response => {
 			setLoading(true)
@@ -177,7 +165,6 @@ const leader_form = ({route, navigation}) => {
 
 	const funcContent = () => {
 		if(data_categories != null){
-			// console.log(data_categories)
 			var button_save = []
 			if(simpan_button){
 				button_save.push(
@@ -194,174 +181,46 @@ const leader_form = ({route, navigation}) => {
 					</ScrollView>
 				)
 			}
-			if(data_categories.id == 1){
-				return (
-					<View>
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Category Process</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data_categories.name}</Text>
-								</View>
+			return (
+				<View>
+					<View style={{flexDirection: 'row'}}>
+						<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
+							<Text>Category Process</Text>
+						</View>
+						<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
+							<Text>:</Text>
+						</View>
+						<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
+							<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+								<Text style={{fontSize: 14}}>{data_categories != null ? data_categories.name : 'HUBUNGI IT DEPT.'}</Text>
 							</View>
 						</View>
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Leader Produksi</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{user_name.substring(5, 1000)}</Text>
-								</View>
-							</View>
-						</View>
-
-						<View style={{flexDirection: 'row', justifyContent: 'center'}}>
-							<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkOperator(data_categories)}><Text>Tambah Operator {data_categories.name}</Text></Button>
-						</View>
-
-						{listOperator()}
-
-						{recomendation}
-						
-						{button_save}
-
 					</View>
-				)
-			}else if(data_categories.id == 2){
-				return (
-					<View>
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Category Process</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data_categories.name}</Text>
-								</View>
+					<View style={{flexDirection: 'row'}}>
+						<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
+							<Text>Leader Produksi</Text>
+						</View>
+						<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
+							<Text>:</Text>
+						</View>
+						<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
+							<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
+								<Text style={{fontSize: 14}}>{user_name}</Text>
 							</View>
 						</View>
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Leader Produksi</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{user_name.substring(5, 1000)}</Text>
-								</View>
-							</View>
-						</View>
-						<View style={{flexDirection: 'row', justifyContent: 'center'}}>
-							<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkOperator(data_categories)}><Text>Tambah Operator {data_categories.name}</Text></Button>
-						</View>
-
-						{listOperator()}
-
-						{recomendation}
-						
-						{button_save}
-
 					</View>
-				)
-			}else if(data_categories.id == 3){
-				return (
-					<View>
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Category Process</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data_categories.name}</Text>
-								</View>
-							</View>
-						</View>
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Leader Produksi</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{user_name.substring(5, 1000)}</Text>
-								</View>
-							</View>
-						</View>
-						<View style={{flexDirection: 'row', justifyContent: 'center'}}>
-							<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkOperator(data_categories)}><Text>Tambah Operator {data_categories.name}</Text></Button>
-						</View>
-						
-						{listOperator()}
-
-						{recomendation}
-						
-						{button_save}
-
+					<View style={{flexDirection: 'row', justifyContent: 'center'}}>
+						<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkOperator(data_categories)}><Text>Tambah Operator {data_categories.name}</Text></Button>
 					</View>
-				)
-			}else if(data_categories.id == 4){
-				return (
-					<View>
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Category Process</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{data_categories.name}</Text>
-								</View>
-							</View>
-						</View>
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', width: '40%', padding: 7, justifyContent: 'center'}}>
-								<Text>Leader Produksi</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 7, justifyContent: 'center'}}>
-								<Text>:</Text>
-							</View>
-							<View style={{flexDirection: 'column', padding: 10, flex: 1}}>
-								<View style={{backgroundColor: '#b8b8b8', justifyContent: 'center', height: 40, borderWidth: 1, paddingLeft: 5, borderRadius: 5, flex: 1}}>
-									<Text style={{fontSize: 14}}>{user_name.substring(5, 1000)}</Text>
-								</View>
-							</View>
-						</View>
-						<View style={{flexDirection: 'row', justifyContent: 'center'}}>
-							<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => checkOperator(data_categories)}><Text>Tambah Operator {data_categories.name}</Text></Button>
-						</View>
-						
-						{listOperator()}
 
-						{recomendation}
-						
-						{button_save}
+					{listOperator()}
 
-					</View>
-				)
-			}else{
-				
-			}
+					{recomendation}
+					
+					{button_save}
+
+				</View>
+			)
 		}
 	}
 
@@ -381,13 +240,9 @@ const leader_form = ({route, navigation}) => {
 			hrd_employee_nik: null
 		}])
 	}
-	
-	const [filtered, setFiltered] = useState(null)
 
 	const searchFunction = (val, key, id) => {
 		setModal(true)
-		setModalId(id)
-		setInputId(id)
 		if(val && modal == true){
 			const list = operator.filter(function (item) {
 				const text_data = val.toUpperCase()
@@ -405,7 +260,6 @@ const leader_form = ({route, navigation}) => {
 	const recommendationFunction = () => {
 		var records = []
 		if(filtered != null){
-			// console.log(filtered.list)
 			if(filtered.list.length > 0){
 				filtered.list.map((v, k) => {
 					records.push(
@@ -440,27 +294,13 @@ const leader_form = ({route, navigation}) => {
 								</View>
 								<View style={{margin: 4, flex: 1}}>
 									<View style={{borderWidth: 0.5, borderRadius: 5, height: 40, justifyContent: 'center', paddingLeft: 5}}>
-										{/* <Picker 
-										mode="dropdown"
-										selectedValue={operator_process[key].hrd_employee_id}
-										onValueChange={(value) => fillOperatorData(value, key)}
-										itemStyle={{marginLeft: 0}}
-										itemTextStyle={{fontSize: 9}}
-										>
-											{loopingOperator()}
-										</Picker> */}
-										{/* <AutocompleteInput 
-											data={data != null ? data.operator_list : null}
-											value={operator_process[key].hrd_employee_id}
-											onChangeText={(value) => fillOperatorData(value, key)}
-											flatListProps={{
-												keyExtractor: (_, idx) => idx,
-												renderItem: ({ item }) => <Text>{item}</Text>,
-											}}
-										/> */}
-
 										<TextInput style={{color: 'black', fontSize: 13}} value={operator_process[key].hrd_employee_name} onChangeText={(value) => searchFunction(value, key, key+1)} placeholder='Search' />
 									</View>
+								</View>
+								<View style={{margin: 4, width: '10%'}} >
+									<TouchableOpacity onPress={() => deleteItem(operator_process[key].id) }>
+										<Image source={sampah} style={{backgroundColor: 'red', borderRadius: 5, height: 40, width: 40}} />
+									</TouchableOpacity>
 								</View>
 							</View>	
 						)
@@ -471,25 +311,9 @@ const leader_form = ({route, navigation}) => {
 		return records
 	}
 
-	// if(data != null){
-	// 	console.log(data.operator_list)
-	// }
-
-	const loopingOperator = () => {
-		var record = []
-		if(data != null){
-			if(data.operator_list.length > 0){
-				record.push(
-					<Picker.Item key={'itemChild'} label={'Pilih'} value={0} />
-				)
-				data.operator_list.map((val, key) => {
-					record.push(
-						<Picker.Item key={key} label={val.nik + ' | ' + val.name} value={val.id} />
-					)
-				})
-			}
-		}
-		return record
+	const deleteItem = (el) => {
+		setSimpanButton(true)
+		setOperatorProcess(operator_process.filter(item => item.id == el ? null : item.id))
 	}
 
 	const fillOperatorData = (el, key, status) => {

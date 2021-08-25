@@ -1,15 +1,12 @@
-import {View, TouchableOpacity, ScrollView, FlatList, ActivityIndicator, Image} from 'react-native';
+import {View, TouchableOpacity, Image} from 'react-native';
 import React from 'react';
 import { Container, Text, Button} from 'native-base';
-import styles from '../Styles/Styling';
-import Home from '../Assets/FixHomeWhite.png'
-import ImageProfile from '../Assets/FixProfileWhite.png'
-import Cog from '../Assets/FixCogWhite.png'
 import AsyncStorage from "@react-native-community/async-storage";
 import app_version from '../System/app_version';
+import nopict from '../Assets/nopict.jpg';
 
 const Profile = ({route, navigation}) => {
-	const {name, deptName, dutyId, userNik} = route.params
+	const {name, dept_name, duty_id, user_nik, user_image} = route.params
 	const buttLogout = async () => {
     try {
 			AsyncStorage.getAllKeys()
@@ -23,9 +20,9 @@ const Profile = ({route, navigation}) => {
     }
 	}
 	const dataDuty = []
-  if(dutyId != null)
+  if(duty_id != null)
   {
-    dutyId.map((element, key) => {
+    duty_id.map((element, key) => {
       dataDuty.push(
 				<Text key={key} style={{fontSize: 15}}>{element.plant_name}</Text>
       )
@@ -45,7 +42,33 @@ const Profile = ({route, navigation}) => {
       </View>
       <View style={{flex: 1, backgroundColor: '#f0f0f0'}}>
 
+				<View style={{paddingTop: 10, flexDirection: 'row', paddingLeft: 12, justifyContent: 'center'}}>
+					<View style={{alignItems: 'center', justifyContent: 'center', height: 127, width: 127, borderWidth: 0.5, borderRadius: 22}}>
+						{
+							user_image != null ?
+							<TouchableOpacity><Image source={{uri: user_image}} style={{width: 125, height: 125, resizeMode: 'cover', borderWidth: 0.5, borderRadius: 25}} /></TouchableOpacity> :
+							<TouchableOpacity><Image source={nopict} style={{width: 125, height: 125, resizeMode: 'cover', borderWidth: 0.5, borderRadius: 25}} /></TouchableOpacity>
+
+						}
+					</View>
+				</View>
+
 				<View style={{height: 100, margin: 15}}>
+
+					<View style={{paddingTop: 10, flexDirection: 'row', paddingLeft: 12}}>
+						<View style={{width: "25%"}}>
+							<Text style={{fontSize: 15}}>Name</Text>
+						</View>
+						<View style={{width: "6%"}}>
+							<Text style={{fontSize: 15}}>:</Text>
+						</View>
+						<View style={{width: "60%"}}>
+							<TouchableOpacity>
+								<Text style={{fontSize: 15}}>{name != null ? name : '-'}</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+					
 					<View style={{paddingTop: 10, flexDirection: 'row', paddingLeft: 12}}>
 						<View style={{width: "25%"}}>
 							<Text style={{fontSize: 15}}>User</Text>
@@ -53,9 +76,9 @@ const Profile = ({route, navigation}) => {
 						<View style={{width: "6%"}}>
 							<Text style={{fontSize: 15}}>:</Text>
 						</View>
-						<View style={{width: "60%"}}>
+						<View>
 							<TouchableOpacity>
-								<Text style={{fontSize: 15}}>{name}</Text>
+								<Text style={{fontSize: 15}}>{user_nik != null ? user_nik : '-'}</Text>
 							</TouchableOpacity>
 						</View>
 					</View>
@@ -69,7 +92,7 @@ const Profile = ({route, navigation}) => {
 						</View>
 						<View>
 							<TouchableOpacity>
-								<Text style={{fontSize: 15}}>{deptName}</Text>
+								<Text style={{fontSize: 15}}>{dept_name}</Text>
 							</TouchableOpacity>
 						</View>
 					</View>
