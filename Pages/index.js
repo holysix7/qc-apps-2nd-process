@@ -10,6 +10,8 @@ import ShowProducts from './Main/show_products';
 import LeaderForm from './Main/Form/Leader/leader_form';
 import LeaderFormShow from './Main/Form/Leader/leader_form_show';
 import QCForm from './Main/Form/QC/qc_form';
+import LotOut from './Main/Form/LotOut/lot_out';
+import NewLotOut from './Main/Form/LotOut/new_lot_out';
 
 export {
   SplashScreen,
@@ -20,5 +22,7 @@ export {
   LeaderForm,
   LeaderFormShow,
   QCForm,
-  Profile
+  LotOut,
+  Profile,
+  NewLotOut
 }

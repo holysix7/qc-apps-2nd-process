@@ -9,7 +9,9 @@ import {
 	LeaderForm,
 	LeaderFormShow,
 	QCForm,
-	Profile
+	LotOut,
+	Profile,
+	NewLotOut
 } from '../Pages'
 
 const Stack = createStackNavigator();
@@ -31,7 +33,9 @@ const Routes = () => {
 			<Stack.Screen name="LeaderForm" component={LeaderForm} />
 			<Stack.Screen name="LeaderFormShow" component={LeaderFormShow} />
 			<Stack.Screen name="QCForm" component={QCForm} />
+			<Stack.Screen name="LotOut" component={LotOut} />
 			<Stack.Screen name="Profile" component={Profile} />
+			<Stack.Screen name="NewLotOut" component={NewLotOut} />
     </Stack.Navigator>  
   )
 }

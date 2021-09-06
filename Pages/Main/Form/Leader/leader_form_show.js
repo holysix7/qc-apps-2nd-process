@@ -9,12 +9,27 @@ import moment from 'moment';
 import app_version from	'../../../System/app_version';
 import base_url from	'../../../System/base_url';
 import {launchCamera} from 'react-native-image-picker';
+import header_form from '../../../Templates/HeaderForm';
 
 const leader_form_show = ({route, navigation}) => {
-  const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name} = route.params
+  const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name, date} = route.params
 	useEffect(() => {
 		get_data()
 	}, [])
+
+	const object_header = {
+		id: 2, 
+		type: 'edit',
+		title: 'Form Data Operator (Edit)',  
+		line_name: line_name != null ? line_name : '-', 
+		date: date, 
+		current_hour: data != null ? data.current_hour : null, 
+		mkt_customer_name: mkt_customer_name != null ? mkt_customer_name : '-',
+		product_name: product_name != null ? product_name : '-', 
+		product_internal_part_id: product_internal_part_id != null ? product_internal_part_id : '-', 
+		product_customer_part_number: product_customer_part_number != null ? product_customer_part_number : '-', 
+		product_model: product_model != null ? product_model : '-'
+	}
 
 	const [data, setData] 	              				= useState(null)
 	const [loading, setLoading] 									= useState(false)
@@ -23,14 +38,13 @@ const leader_form_show = ({route, navigation}) => {
 	const [operator, setOperator] 	              = useState([])
 	const [filtered, setFiltered] 								= useState(null)
 	const [modal, setModal]												= useState(true)
-	// console.log(operator_lama)
 	/**
 	 * Parameters
 	 */
 	const [data_categories, setCategories]				= useState(null)
 	const [operator_process, setOperatorProcess]	= useState([])
-	let date 																			= moment().format("YYYY-MM-DD")
 
+	
 	const submit = async() => {
 		setLoading(false)
 		const user_id = await AsyncStorage.getItem('id')
@@ -44,7 +58,6 @@ const leader_form_show = ({route, navigation}) => {
 			planning_pic_products: operator_lama,
 			new_planning_pic_products: operator_process
 		}
-		console.log(body)
 		var config = {
 			method: 'put',
 			url: `${base_url}/api/v2/secproc_update`,
@@ -101,7 +114,6 @@ const leader_form_show = ({route, navigation}) => {
 			user_id: user_id,
 			secproc_planning_product_item_id: secproc_planning_product_item_id,
 		}
-		console.log(params)
 		Axios.get(`${base_url}/api/v2/secprocs/secproc_show?`, {params: params, headers: headers})
 		.then(response => {
 			setLoading(true)
@@ -316,7 +328,7 @@ const leader_form_show = ({route, navigation}) => {
 												</View>
 											</View>
 											<View style={{margin: 4, width: '10%'}} >
-												<TouchableOpacity onPress={() => deleteItem(key, operator_process, operator_process[key].operator_id) }>
+												<TouchableOpacity onPress={() => deleteItem(key, operator_process[key].operator_id) }>
 													<Image source={sampah} style={{backgroundColor: 'red', borderRadius: 5, height: 40, width: 40}} />
 												</TouchableOpacity>
 											</View>
@@ -332,19 +344,14 @@ const leader_form_show = ({route, navigation}) => {
 		return records
 	}
 
-	const deleteItem = (key, type, el) => {
+	const deleteItem = (key, el) => {
 		setSimpanButton(true)
-		if(type == 'api-call'){
-			// setOperatorLama()
-		}else{
-			setOperatorProcess(operator_process.filter(item => item.operator_id == el ? null : item.operator_id))
-			if(operator_lama.length < key){
-				let new_object = [...operator_lama]
-				new_object[key].status = 'suspend' 
-				setOperatorLama(new_object)
-			}
-		}
+		setOperatorProcess(operator_process.filter(item => item.operator_id == el ? null : item.operator_id))
+		let new_object = [...operator_lama]
+		new_object[key].status = 'suspend' 
+		setOperatorLama(new_object)
 	}
+	console.log(operator_lama)
 
 	return(
 		<KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : "height"} style={{flex:1}}>
@@ -352,51 +359,7 @@ const leader_form_show = ({route, navigation}) => {
 				<Container>
 					<View style={{flex: 1, height: 100, backgroundColor: '#dfe0df', borderWidth: 0.3, flexDirection: 'column'}}>
 						
-						<View style={{justifyContent: 'center', alignItems: 'center', backgroundColor: '#dfe0df'}}>
-							<Image source={LogoSIP}/>
-						</View>
-
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', borderTopWidth: 0.3, borderRightWidth: 0.3, justifyContent: 'center', alignItems: 'center', width: "50%", backgroundColor: '#dfe0df'}}>
-								<View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%'}}>
-									<Text style={{fontWeight: 'bold'}}>Show Data Operator</Text>
-								</View>
-							</View>
-							<View style={{flexDirection: 'column', flex: 1}}>
-								<View style={{flexDirection: 'row', borderTopWidth: 0.3, height: 40, justifyContent: 'center', alignItems: 'center'}}>
-									<Text style={{fontWeight: 'bold', fontSize: 17}}>{line_name != null ? line_name : '-'}</Text>
-								</View>
-								<View style={{flexDirection: 'row', borderTopWidth: 0.3}}>
-									<View style={{flexDirection: 'column', width: '50%', borderRightWidth: 0.3, alignItems: 'center'}}>
-										<Text style={{fontWeight: 'bold', fontSize: 13}}>{date != null ? date : '-'}</Text>
-									</View>
-									<View style={{flexDirection: 'column', paddingLeft: 5, flex: 1, alignItems: 'center'}}>
-										<Text style={{fontWeight: 'bold', fontSize: 13}}>Jam Ke - {data != null ? data.current_hour : null}</Text>
-									</View>
-								</View>
-							</View>
-						</View>
-
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', borderTopWidth: 0.3, borderRightWidth: 0.3, padding: 15, justifyContent: 'center', alignItems: 'center', width: "50%", backgroundColor: '#dfe0df'}}>
-								<Text style={{marginTop: 1, fontWeight: 'bold', fontSize: 11}}>{mkt_customer_name != null ? mkt_customer_name : '-'}</Text>
-							</View>
-							<View style={{flexDirection: 'column', borderTopWidth: 0.3, justifyContent: 'center', alignItems: 'center', flex: 1}}>
-								<Text style={{fontWeight: 'bold', fontSize: 11}}>{product_name != null ? product_name : '-'}</Text>
-							</View>
-						</View>
-
-						<View style={{borderWidth: 0.5, flexDirection: 'row'}}>
-							<View style={{flex: 1, justifyContent: 'center', borderRightWidth: 0.3, alignItems: 'center', paddingHorizontal: 5, height: 25}}>
-								<Text style={{fontSize: 11, fontWeight: 'bold'}}>{product_internal_part_id != null ? product_internal_part_id : '-'}</Text>
-							</View>
-							<View style={{width: '33%', justifyContent: 'center', borderRightWidth: 0.3, alignItems: 'center', height: 25, paddingHorizontal: 5}}>
-								<Text style={{fontSize: 11, fontWeight: 'bold'}}>{product_customer_part_number != null ? product_customer_part_number : '-'}</Text>
-							</View>
-							<View style={{width: '33%', justifyContent: 'center', borderRightWidth: 0.3, alignItems: 'center', paddingHorizontal: 5, height: 25}}>
-								<Text style={{fontSize: 11, fontWeight: 'bold'}}>Model: {product_model != null ? product_model : '-'}</Text>
-							</View>
-						</View>
+						{header_form(object_header)}
 
 						{loading ? content() : <View style={{justifyContent: 'center'}}><ActivityIndicator size="large" color="#0000ff"/></View>}
 

@@ -5,10 +5,13 @@ import styles from '../Styles/Styling'
 import Home from '../Assets/FixHomeWhite.png'
 import Profile from '../Assets/FixProfileWhite.png'
 import CalendarWhite from '../Assets/calendarWhite.png'
+import Calendar from '../Assets/calendar.png'
 import AsyncStorage from "@react-native-community/async-storage";
 import axios from 'axios';
 import app_version from '../System/app_version';
 import base_url from '../System/base_url'
+import content_data from '../Templates/Content';
+import footer from '../Templates/Footer';
 
 const Main = ({navigation}) => {
   
@@ -22,6 +25,21 @@ const Main = ({navigation}) => {
   const [loading, setLoading]                         = useState(false);
   const [data, setData]                               = useState([]);
   const [refreshing, setRefreshing]                   = useState(false);
+  
+	const object_data = {
+		type: 'list_lines',
+		data: data, 
+    sys_plant_id: cekId,
+    user_id: user_id
+	}
+  
+  const object_footer = {
+    name: name,
+    dept_name: deptName,
+    duty_id: dutyId,
+    user_nik: userNik,
+    user_image: employees_image
+  }
   
   useEffect(() => {
     session()
@@ -41,6 +59,7 @@ const Main = ({navigation}) => {
       user_id: user_id,
       app_version: app_version
     }
+    console.log(params)
     axios.get(`${base_url}/api/v2/secprocs?`, {params: params, headers: headers})
     .then(response => {
       setLoading(true)
@@ -102,77 +121,7 @@ const Main = ({navigation}) => {
     }
     return records
   }
-
-  const listLines = () => {
-    var records = []
-    if(cekId != null){
-      if(data.length > 0){
-        data.map(element => {
-          records.push(
-            <Button key={element.id} style={{backgroundColor: '#1a508b', marginTop: 5, marginVertical: 2, marginHorizontal: 3, height: 45, width: "23%", borderRadius: 5}}
-            onPress={() => {
-              navigation.navigate('ShowProducts', {
-                line_id: element.id,
-                line_name: element.name,
-                line_number: element.number,
-                sys_plant_id: element.sys_plant_id,
-                line_status: element.status,
-                user_id: user_id
-              })
-            }}
-            >
-              <View style={{flexDirection: 'column', alignItems: 'center', flex: 1}}>
-                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}}>
-                  <View style={{flexDirection: 'column'}}>
-                    <Text style={{fontSize: 10}}>{element.name}</Text> 
-                  </View>
-                </View>
-              </View>
-              {
-                element.planning_status == 'Ready' ?
-                <View style={{flexDirection: 'column', paddingRight: 5}}>
-                  <Image source={CalendarWhite} style={{width: 20, height: 20}} /> 
-                </View> :
-                null
-              }
-            </Button>
-          )
-        });
-      }else{
-        records.push(
-          <View key={'wkwkw'} style={{width: '100%', padding: 25, flexDirection: 'row', justifyContent: 'center'}}>
-            <View style={{justifyContent: 'center', height: 200, padding: 10, borderRadius: 10, backgroundColor: '#F3F2C9'}}>
-              <Text style={{textAlign: 'justify', color: 'grey'}}>Tidak ada data line di plant ini</Text>
-            </View>
-          </View>
-        )
-      }
-    }
-    return records
-  }
-
-  const buttonNavbar = () => {
-    return (
-      <View style={styles.bottomNavbar}>
-        <Button style={styles.buttonNavbar}>
-          <Image source={Home} style={styles.homeButton}/>
-        </Button>
-
-        <Button style={styles.buttonNavbar} onPress={() => {
-          navigation.navigate('Profile', {
-            name: name,
-            dept_name: deptName,
-            duty_id: dutyId,
-            user_nik: userNik,
-            user_image: employees_image
-          })
-        }}>
-          <Image source={Profile} style={styles.profileButton}/>
-        </Button>
-      </View>
-    )
-  }
-
+  
   const headerContent = () => {
     return (
       <View>
@@ -188,6 +137,77 @@ const Main = ({navigation}) => {
   const onRefresh = () => {
     setLoading(false)
     lines(cekId)
+  }
+
+  const statusExplained = () => {
+    return (
+      <View style={{width: "97%", flexDirection: 'row', paddingVertical: 0}}>
+        <View style={{width: '25%', flexDirection: 'column'}}>
+          {/* Column A */}
+          <View style={{flexDirection: 'row', paddingVertical: 1}}>
+            <View style={{backgroundColor: '#1a508b', padding: 8, margin: 5}}></View>
+            <View style={{justifyContent: 'center'}}>
+              <Text style={{fontWeight: 'bold', fontSize: 8}}>: Loaded</Text>
+            </View>
+          </View>
+          <View style={{flexDirection: 'row', paddingVertical: 1}}>
+            <View style={{backgroundColor: 'yellow', padding: 8, margin: 5}}></View>
+            <View style={{justifyContent: 'center'}}>
+              <Text style={{fontWeight: 'bold', fontSize: 8}}>: No Load</Text>
+            </View>
+          </View>
+        </View>
+        <View style={{width: '25%', flexDirection: 'column'}}>
+          {/* Column B */}
+          <View style={{flexDirection: 'row', paddingVertical: 1}}>
+            <View style={{backgroundColor: 'red', padding: 8, margin: 5}}></View>
+            <View style={{justifyContent: 'center'}}>
+              <Text style={{fontWeight: 'bold', fontSize: 8}}>: Broken</Text>
+            </View>
+          </View>
+          <View style={{flexDirection: 'row', paddingVertical: 1}}>
+          </View>
+          <View style={{flexDirection: 'row', paddingVertical: 1}}>
+            <View style={{paddingLeft: 8}}><Text style={{color: 'red'}}>* </Text></View>
+            <View style={{justifyContent: 'center'}}>
+              <Text style={{fontWeight: 'bold', fontSize: 8}}>  : Terdapat NG</Text>
+            </View>
+          </View>
+          <View style={{flexDirection: 'row', paddingVertical: 1}}>
+          </View>
+        </View>
+        <View style={{width: '25%', flexDirection: 'column'}}>
+          {/* Column C */}
+          <View style={{flexDirection: 'row', paddingVertical: 1}}>
+            <View style={{backgroundColor: '#ebae34', padding: 8, margin: 5}}></View>
+            <View style={{justifyContent: 'center'}}>
+              <Text style={{fontWeight: 'bold', fontSize: 8}}>: Maintenance</Text>
+            </View>
+          </View>
+          <View style={{flexDirection: 'row', paddingVertical: 1}}>
+          </View>
+          <View style={{flexDirection: 'row', paddingVertical: 1}}>
+            <Image source={Calendar} style={{width: 20, height: 20, marginLeft: 4 }} />
+            <View style={{justifyContent: 'center'}}>
+              <Text style={{fontWeight: 'bold', fontSize: 8}}>: Terdapat Planning</Text>
+            </View>
+          </View>
+          <View style={{flexDirection: 'row', paddingVertical: 1}}>
+          </View>
+        </View>
+        <View style={{width: '25%', flexDirection: 'column'}}>
+          {/* Column D */}
+          <View style={{flexDirection: 'row', paddingVertical: 1}}>
+            <View style={{backgroundColor: 'green', padding: 8, margin: 5}}></View>
+            <View style={{justifyContent: 'center'}}>
+              <Text style={{fontWeight: 'bold', fontSize: 8}}>: Trial</Text>
+            </View>
+          </View>
+          <View style={{flexDirection: 'row', paddingVertical: 1}}>
+          </View>
+        </View>
+      </View>
+    )
   }
 
   return (
@@ -209,84 +229,18 @@ const Main = ({navigation}) => {
       </View>
       <View style={{flex: 1, backgroundColor: '#dfe0df'}}>
         <ScrollView style={styles.contentFull} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} >
-          {/* {loading == true ? <View><ActivityIndicator size="large" color='#0000ff'/></View> : null} */}
           <View style={styles.responsiveButtonLoop}>
-            {loading ? listLines() : <View style={{flex: 1, height: 500, justifyContent: 'center'}}><ActivityIndicator size="large" color="#0000ff"/></View> }
+            {loading ? content_data(object_data, navigation) : <View style={{flex: 1, height: 500, justifyContent: 'center'}}><ActivityIndicator size="large" color="#0000ff"/></View> }
           </View>
           {loading ? <View style={{alignItems: 'center', borderTopWidth: 1, borderTopColor: 'gray', paddingVertical: 10}}></View> : null}
           {loading ? <View style={{flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
 
-            <View style={{width: "97%", flexDirection: 'row', paddingVertical: 0}}>
-              <View style={{width: '25%', flexDirection: 'column'}}>
-                {/* Column A */}
-                <View style={{flexDirection: 'row', paddingVertical: 1}}>
-                  <View style={{backgroundColor: '#1a508b', padding: 8, margin: 5}}></View>
-                  <View style={{justifyContent: 'center'}}>
-                    <Text style={{fontWeight: 'bold', fontSize: 8}}>: Loaded</Text>
-                  </View>
-                </View>
-                <View style={{flexDirection: 'row', paddingVertical: 1}}>
-                  <View style={{backgroundColor: 'yellow', padding: 8, margin: 5}}></View>
-                  <View style={{justifyContent: 'center'}}>
-                    <Text style={{fontWeight: 'bold', fontSize: 8}}>: No Load</Text>
-                  </View>
-                </View>
-              </View>
-              <View style={{width: '25%', flexDirection: 'column'}}>
-                {/* Column B */}
-                <View style={{flexDirection: 'row', paddingVertical: 1}}>
-                  <View style={{backgroundColor: 'red', padding: 8, margin: 5}}></View>
-                  <View style={{justifyContent: 'center'}}>
-                    <Text style={{fontWeight: 'bold', fontSize: 8}}>: Broken</Text>
-                  </View>
-                </View>
-                <View style={{flexDirection: 'row', paddingVertical: 1}}>
-                </View>
-                <View style={{flexDirection: 'row', paddingVertical: 1}}>
-                  <View style={{paddingLeft: 8}}><Text style={{color: 'red'}}>* </Text></View>
-                  <View style={{justifyContent: 'center'}}>
-                    <Text style={{fontWeight: 'bold', fontSize: 8}}>  : Terdapat NG</Text>
-                  </View>
-                </View>
-                <View style={{flexDirection: 'row', paddingVertical: 1}}>
-                </View>
-              </View>
-              <View style={{width: '25%', flexDirection: 'column'}}>
-                {/* Column C */}
-                <View style={{flexDirection: 'row', paddingVertical: 1}}>
-                  <View style={{backgroundColor: '#ebae34', padding: 8, margin: 5}}></View>
-                  <View style={{justifyContent: 'center'}}>
-                    <Text style={{fontWeight: 'bold', fontSize: 8}}>: Maintenance</Text>
-                  </View>
-                </View>
-                <View style={{flexDirection: 'row', paddingVertical: 1}}>
-                </View>
-                <View style={{flexDirection: 'row', paddingVertical: 1}}>
-                  <Image source={CalendarWhite} style={{width: 20, height: 20, marginLeft: 4 }} />
-                  <View style={{justifyContent: 'center'}}>
-                    <Text style={{fontWeight: 'bold', fontSize: 8}}>: Terdapat Planning</Text>
-                  </View>
-                </View>
-                <View style={{flexDirection: 'row', paddingVertical: 1}}>
-                </View>
-              </View>
-              <View style={{width: '25%', flexDirection: 'column'}}>
-                {/* Column D */}
-                <View style={{flexDirection: 'row', paddingVertical: 1}}>
-                  <View style={{backgroundColor: 'green', padding: 8, margin: 5}}></View>
-                  <View style={{justifyContent: 'center'}}>
-                    <Text style={{fontWeight: 'bold', fontSize: 8}}>: Trial</Text>
-                  </View>
-                </View>
-                <View style={{flexDirection: 'row', paddingVertical: 1}}>
-                </View>
-              </View>
-            </View>
+          {statusExplained()}
 
           </View> : null }
         </ScrollView>
       </View>
-      {userNik != null ? buttonNavbar() : null }
+      {userNik != null ? footer(object_footer, navigation) : null}
     </Container>
   ) 
 }

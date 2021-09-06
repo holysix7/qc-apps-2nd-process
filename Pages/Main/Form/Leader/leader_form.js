@@ -1,22 +1,32 @@
 import {Image, View, TextInput, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, ScrollView, ActivityIndicator, Alert, VirtualizedList, TouchableOpacity} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import { Container, Text, Button, Picker } from 'native-base';
-import LogoSIP from '../../../Assets/logo-sip370x50.png';
 import sampah from '../../../Assets/tong-sampah.png';
 import AsyncStorage from "@react-native-community/async-storage";
 import Axios from 'axios';
-import moment from 'moment';
 import app_version from	'../../../System/app_version';
 import base_url from	'../../../System/base_url';
-import AutocompleteInput from 'react-native-autocomplete-input';
+import header_form from '../../../Templates/HeaderForm';
 
 const leader_form = ({route, navigation}) => {
-  const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name} = route.params
+  const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name, date} = route.params
 	useEffect(() => {
 		get_data()
 	}, [])
+	const object_header = {
+		id: 2, 
+		type: 'create',
+		title: 'Form Data Operator', 
+		line_name: line_name != null ? line_name : '-', 
+		date: date, 
+		current_hour: data != null ? data.current_hour : null, 
+		mkt_customer_name: mkt_customer_name != null ? mkt_customer_name : '-',
+		product_name: product_name != null ? product_name : '-', 
+		product_internal_part_id: product_internal_part_id != null ? product_internal_part_id : '-', 
+		product_customer_part_number: product_customer_part_number != null ? product_customer_part_number : '-', 
+		product_model: product_model != null ? product_model : '-'
+	}
 	const [user_name, setUserName] 	      				= useState(null)
-	const [simpan_button, setSimpanButton] 	      = useState(null)
 	const [data, setData] 	              				= useState(null)
 	const [operator, setOperator] 	              = useState([])
 	const [loading, setLoading] 									= useState(false)
@@ -25,7 +35,6 @@ const leader_form = ({route, navigation}) => {
 	const [filtered, setFiltered] 								= useState(null)
 	const [operator_process, setOperatorProcess]	= useState([])
 	const [total_process, setTotalProcess]				= useState([])
-	let date 																			= moment().format("YYYY-MM-DD")
 
 	const submit = async() => {
 		setLoading(false)
@@ -166,7 +175,7 @@ const leader_form = ({route, navigation}) => {
 	const funcContent = () => {
 		if(data_categories != null){
 			var button_save = []
-			if(simpan_button){
+			if(operator_process.length > 0){
 				button_save.push(
 					<View key={'but_sub'} style={{flexDirection: 'row', justifyContent: 'center'}}>
 						<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => submit()}><Text>Simpan</Text></Button>
@@ -225,7 +234,6 @@ const leader_form = ({route, navigation}) => {
 	}
 
 	const checkOperator = (value) => {
-		setSimpanButton(true)
 		setTotalProcess([...total_process, {
 			id: total_process.length + 1,
 			category_process_id: value.id,
@@ -312,7 +320,6 @@ const leader_form = ({route, navigation}) => {
 	}
 
 	const deleteItem = (el) => {
-		setSimpanButton(true)
 		setOperatorProcess(operator_process.filter(item => item.id == el ? null : item.id))
 	}
 
@@ -332,50 +339,7 @@ const leader_form = ({route, navigation}) => {
 			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 				<Container>
 					<View style={{flex: 1, height: 100, backgroundColor: '#dfe0df', borderWidth: 0.3, flexDirection: 'column'}}>
-						
-						<View style={{justifyContent: 'center', alignItems: 'center', backgroundColor: '#dfe0df'}}>
-							<Image source={LogoSIP}/>
-						</View>
-
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', borderTopWidth: 0.3, borderRightWidth: 0.3, padding: 15, justifyContent: 'center', alignItems: 'center', width: "50%", backgroundColor: '#dfe0df'}}>
-								<Text style={{marginTop: 1, fontWeight: 'bold', fontSize: 17}}>Form Data Operator</Text>
-							</View>
-							<View style={{flexDirection: 'column', flex: 1}}>
-								<View style={{flexDirection: 'row', borderTopWidth: 0.3, height: 40, justifyContent: 'center', alignItems: 'center'}}>
-									<Text style={{fontWeight: 'bold', fontSize: 17}}>{line_name != null ? line_name : '-'}</Text>
-								</View>
-								<View style={{flexDirection: 'row', borderTopWidth: 0.3}}>
-									<View style={{flexDirection: 'column', width: '50%', borderRightWidth: 0.3, alignItems: 'center'}}>
-										<Text style={{fontWeight: 'bold', fontSize: 13}}>{date != null ? date : '-'}</Text>
-									</View>
-									<View style={{flexDirection: 'column', paddingLeft: 5, flex: 1, alignItems: 'center'}}>
-										<Text style={{fontWeight: 'bold', fontSize: 13}}>shift 1</Text>
-									</View>
-								</View>
-							</View>
-						</View>
-
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', borderTopWidth: 0.3, borderRightWidth: 0.3, padding: 15, justifyContent: 'center', alignItems: 'center', width: "50%", backgroundColor: '#dfe0df'}}>
-								<Text style={{marginTop: 1, fontWeight: 'bold', fontSize: 11}}>{mkt_customer_name != null ? mkt_customer_name : '-'}</Text>
-							</View>
-							<View style={{flexDirection: 'column', borderTopWidth: 0.3, justifyContent: 'center', alignItems: 'center', flex: 1}}>
-								<Text style={{fontWeight: 'bold', fontSize: 11}}>{product_name != null ? product_name : '-'}</Text>
-							</View>
-						</View>
-
-						<View style={{borderWidth: 0.5, flexDirection: 'row'}}>
-							<View style={{flex: 1, justifyContent: 'center', borderRightWidth: 0.3, alignItems: 'center', paddingHorizontal: 5, height: 25}}>
-								<Text style={{fontSize: 11}}>{product_internal_part_id != null ? product_internal_part_id : '-'}</Text>
-							</View>
-							<View style={{width: '33%', justifyContent: 'center', borderRightWidth: 0.3, alignItems: 'center', height: 25, paddingHorizontal: 5}}>
-								<Text style={{fontSize: 11}}>{product_customer_part_number != null ? product_customer_part_number : '-'}</Text>
-							</View>
-							<View style={{width: '33%', justifyContent: 'center', borderRightWidth: 0.3, alignItems: 'center', paddingHorizontal: 5, height: 25}}>
-								<Text style={{fontSize: 11}}>{product_model != null ? product_model : '-'}</Text>
-							</View>
-						</View>
+						{header_form(object_header)}
 
 						{loading ? content() : <View style={{justifyContent: 'center'}}><ActivityIndicator size="large" color="#0000ff"/></View>}
 

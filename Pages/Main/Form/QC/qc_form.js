@@ -1,7 +1,6 @@
 import {Image, View, TextInput, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, ScrollView, ActivityIndicator, Alert, VirtualizedList, TouchableOpacity} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import { Container, Text, Button, Picker } from 'native-base';
-import LogoSIP from '../../../Assets/logo-sip370x50.png';
 import cameraicon from '../../../Assets/cameraicon.png';
 import sampah from '../../../Assets/tong-sampah.png';
 import AsyncStorage from "@react-native-community/async-storage";
@@ -10,14 +9,13 @@ import moment from 'moment';
 import app_version from	'../../../System/app_version';
 import base_url from	'../../../System/base_url';
 import {launchCamera} from 'react-native-image-picker';
+import header_form from '../../../Templates/HeaderForm';
 
 const qc_form = ({route, navigation}) => {
-  const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name, default_shift, dept_name} = route.params
+  const {secproc_planning_product_item_id, product_name, product_internal_part_id, product_customer_part_number, mkt_customer_name, product_model, sys_plant_id, line_name, default_shift, dept_name, date} = route.params
 	useEffect(() => {
 		get_data()		
-		// setInterval(() => {
-			FixInspectionTime()
-		// }, 3500);
+		FixInspectionTime()
 		let isMounted = true
 		return () => {
 			isMounted = false
@@ -39,9 +37,22 @@ const qc_form = ({route, navigation}) => {
 		}
 	}, [])
 
-	const [index_image, setIndexImage]						= useState(0)
 	const [data, setData] 	              				= useState(null)
-	const [simpan_button, setSimpanButton] 	      = useState(null)
+
+	const object_header = {
+		id: 1, 
+		type: 'create',
+		title: 'Check Sheet 2nd Process', 
+		line_name: line_name != null ? line_name : '-', 
+		date: date, 
+		current_hour: data != null ? data.current_hour : null, 
+		mkt_customer_name: mkt_customer_name != null ? mkt_customer_name : '-',
+		product_name: product_name != null ? product_name : '-', 
+		product_internal_part_id: product_internal_part_id != null ? product_internal_part_id : '-', 
+		product_customer_part_number: product_customer_part_number != null ? product_customer_part_number : '-', 
+		product_model: product_model != null ? product_model : '-'
+	}
+
 	/**
 	 * Parameters
 	 */
@@ -60,12 +71,37 @@ const qc_form = ({route, navigation}) => {
 	const [data_categories, setCategories]						= useState(null)
 	const [ng_details, setNGDetails]									= useState([])
 	const [category_processes, setCategoryProcesses]	= useState([])
-	let date 																					= moment().format("YYYY-MM-DD")
 
 	const submit = async() => {
 		setLoading(false)
 		const user_id = await AsyncStorage.getItem('id')
 		const token = await AsyncStorage.getItem("key")
+		var new_catpros = []
+		category_processes.map((v, k) => {
+			var new_ng_obj
+			var new_ng_arr = []
+			ng_details.map((el, obj) => {
+				if(v.category_process_id == el.category_process_id){
+					new_ng_obj = ng_details
+					new_ng_arr.push(
+						{
+							category_process_id: el.category_process_id,
+							id: el.id,
+							ng_category_id: el.ng_category_id,
+							ng_quantity: parseInt(el.ng_quantity)
+						}
+					)
+				}
+			})
+			var new_obj = {
+				id: v.id,
+				category_process_id: v.category_process_id,
+				name: v.name,
+				img_base64_full: v.img_base64_full,
+				ng_details: new_ng_arr
+			}
+			new_catpros.push(new_obj)
+		})
 		var check_appearance_pn = appearance_pn == null || appearance_pn.length == 0 ? 0 : appearance_pn
 		var body = {
 			sys_plant_id: sys_plant_id,
@@ -83,10 +119,8 @@ const qc_form = ({route, navigation}) => {
 			final_judgement: final_judgement, 
 			inspection_time: inspectionTime, 
 			note_unnormal: note_unnormal, 
-			category_processes: category_processes, 
-			ng_details: ng_details
+			category_processes: new_catpros, 
 		}
-		console.log(check_appearance_pn)
 		var config = {
 			method: 'post',
 			url: `${base_url}/api/v2/secprocs`,
@@ -109,7 +143,6 @@ const qc_form = ({route, navigation}) => {
 					{ 
 						text: "OK", 
 						onPress: () => navigation.navigate('ShowProducts')
-						// onPress: () => navigation.navigate('ShowProducts')
 					}
 				],
 				{ cancelable: false }
@@ -368,7 +401,6 @@ const qc_form = ({route, navigation}) => {
 		if(data != null){
 			if(data.category_processes.length > 0){
 				data.category_processes.map((val, key) => {
-				// console.log(val.category_process_name)
 					if(data_categories != null) {
 						if(val.category_process_id == data_categories.id){
 							warna = '#39A2DB'
@@ -379,7 +411,6 @@ const qc_form = ({route, navigation}) => {
 						}
 						category_process.push(
 							<TouchableOpacity key={key} style={{flexDirection: 'column', height: 50, justifyContent: 'center', borderWidth: 0.3, marginHorizontal: 2, paddingHorizontal: 5, backgroundColor: warna}} onPress={() => setCategories({id: val.category_process_id, name: val.category_process_name})}>
-							{/* <TouchableOpacity style={{flexDirection: 'column', height: 50, justifyContent: 'center'}} onPress={() => setCategories({id: val.category_process_id, name: val.category_process_name})}> */}
 								<Text style={{color: color}}>{val.category_process_name}</Text>
 							</TouchableOpacity>
 						)
@@ -522,6 +553,7 @@ const qc_form = ({route, navigation}) => {
 		)
 	}
 
+	// console.log(category_processes)
 	const funcContent = () => {
 
 		var add_ngs 				= []
@@ -529,44 +561,64 @@ const qc_form = ({route, navigation}) => {
 		var button_submit 	= []
 		var note_unnormals 	= []
 		var inspection_time = []
+		var obj_ng_detail = false
 		if(data_categories != null){
 			var ng_summaries = 0
-
+			var simpan_button = true
+			var nilai_pn = appearance_pn == null ? 0 : appearance_pn
 			if(ng_details.length > 0){
 				ng_details.map((v, k) => {
 					ng_summaries += v.ng_quantity != null ? parseInt(v.ng_quantity) : 0
 				})
 			}
-
-			var simpan_button = true
-			var nilai_pn = appearance_pn == null ? 0 : appearance_pn
+			if(category_processes.length > 0){
+				category_processes.map((v, k) => {
+					if(v.category_process_id == data_categories.id){
+						obj_ng_detail = true
+					}
+				})
+			}
 			if(ng_summaries <= nilai_pn){
 				if(ng_summaries < appearance_pn){
-					add_ngs.push(
-						<View key='add_ngs' style={{flexDirection: 'row', justifyContent: 'center'}}>
-							<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
-						</View>
-					)
+					if(obj_ng_detail == true){
+						if(category_processes.length > 0){
+							add_ngs.push(
+								<View key='add_ngs' style={{flexDirection: 'row', justifyContent: 'center'}}>
+									<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkNGDetails(data_categories)}><Text>Add NG Category</Text></Button>
+								</View>
+							)
+						}
+					}else{
+						add_ngs.push(
+							<View key='add_ngs' style={{flexDirection: 'row', justifyContent: 'center'}}>
+								<Button style={{marginVertical: 10, borderRadius: 5}} onPress={() => checkCategoryProcess(data_categories)}><Text>Add Category Process</Text></Button>
+							</View>
+						)
+					}
 				}
 			}else{
 				simpan_button = false
 				add_ngs.push(
-					<View key={'wkwkw'} style={{width: '100%', padding: 25, flexDirection: 'row', justifyContent: 'center'}}>
+					<View key={'add_ngs'} style={{width: '100%', padding: 25, flexDirection: 'row', justifyContent: 'center'}}>
 						<View style={{justifyContent: 'center', height: 200, padding: 10, borderRadius: 10, backgroundColor: '#F3F2C9'}}>
 							<Text style={{textAlign: 'center', color: 'grey'}}>Jumlah NG Melebihi Nilai Appearance N Atau Jumlah NG Tidak Diinput Maka Form Check Sheet tidak bisa disimpan </Text>
 						</View>
 					</View>
 				)
 			}
-			if(simpan_button){
-				if(index_image < 8){
-					add_images.push(
-						<View key='add_images' style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
-							<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
-						</View>
-					)
-				}
-			}
+			// if(ng_summaries <= nilai_pn){
+			// 	if(ng_summaries < appearance_pn){
+			// 		if(simpan_button){
+			// 			if(index_image < 8){
+			// 				add_images.push(
+			// 					<View key='add_images' style={{flexDirection: 'row', justifyContent: 'center', marginVertical: 20, borderTopWidth: 0.3}}>
+			// 						<Button style={{marginTop: 10, borderRadius: 5}} onPress={() => addItemImage(data_categories)}><Text>Tambah Foto</Text></Button>
+			// 					</View>
+			// 				)
+			// 			}
+			// 		}
+			// 	}
+			// }
 
 			if(simpan_button){
 				note_unnormals.push(
@@ -709,7 +761,24 @@ const qc_form = ({route, navigation}) => {
 		return records
 	}
 
+	const checkCategoryProcess = (value) => {
+		newFunc(value)
+	}
+
 	const checkNGDetails = (value) => {
+		newFuncNgDetails(value)
+	}
+
+	const newFunc = (value) => {
+		setCategoryProcesses([...category_processes, {
+			id: category_processes.length + 1,
+			category_process_id: value.id,
+			name: value.name,
+			img_base64_full: null
+		}])
+	}
+
+	const newFuncNgDetails = (value) => {
 		setNGDetails([...ng_details, {
 			id: ng_details.length + 1,
 			category_process_id: value.id,
@@ -718,26 +787,13 @@ const qc_form = ({route, navigation}) => {
 		}])
 	}
 
-  const addItemImage = (value) => {
-    setIndexImage(index_image + 1)
-    checkNGDetailsImage(value)
-  }
-
-	const checkNGDetailsImage = (value) => {
-    if(index_image < 5){
-			setCategoryProcesses([...category_processes, {
-				id: category_processes.length + 1,
-				category_process_id: value.id,
-				name: value.name,
-				img_base64_full: null
-			}])
-		}
-	}
-
 	const defect_function = () => {
 		var records = []
 		if(data != null){
 			if(data.category_processes.length > 0){
+				records.push(
+					<Picker.Item label='Pilih' value='0' key='pilih' />
+				)
 				data.category_processes.map((v, k) => {
 					if(v.defect_categories.length > 0){
 						v.defect_categories.map((el, key) => {
@@ -808,7 +864,6 @@ const qc_form = ({route, navigation}) => {
 							var image = <Image source={{uri: val.img_base64_full}} style={{width: 270, height: 270, resizeMode: 'contain'}}/>
 						}else{
 							var image = <Image source={cameraicon} style={{width: 50, height: 50}} />
-
 						}
 						records.push(
 							<View key={key} style={{paddingTop: 20, flexDirection: 'row', flex: 1, justifyContent: 'center'}}>
@@ -827,7 +882,6 @@ const qc_form = ({route, navigation}) => {
 	}
 	
 	const deleteItem = (el) => {
-		setSimpanButton(true)
 		setNGDetails(ng_details.filter(item => item.id == el ? null : item.id))
 	}
 	
@@ -848,55 +902,8 @@ const qc_form = ({route, navigation}) => {
 			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 				<Container>
 					<View style={{flex: 1, height: 100, backgroundColor: '#dfe0df', borderWidth: 0.3, flexDirection: 'column'}}>
-						
-						<View style={{justifyContent: 'center', alignItems: 'center', backgroundColor: '#dfe0df'}}>
-							<Image source={LogoSIP}/>
-						</View>
 
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', borderTopWidth: 0.3, borderRightWidth: 0.3, justifyContent: 'center', alignItems: 'center', width: "50%", backgroundColor: '#dfe0df'}}>
-								<View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%'}}>
-									<Text style={{fontWeight: 'bold'}}>Check Sheet</Text>
-								</View>
-								<View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%'}}>
-									<Text style={{fontWeight: 'bold'}}>2nd Process</Text>
-								</View>
-							</View>
-							<View style={{flexDirection: 'column', flex: 1}}>
-								<View style={{flexDirection: 'row', borderTopWidth: 0.3, height: 40, justifyContent: 'center', alignItems: 'center'}}>
-									<Text style={{fontWeight: 'bold', fontSize: 17}}>{line_name != null ? line_name : '-'}</Text>
-								</View>
-								<View style={{flexDirection: 'row', borderTopWidth: 0.3}}>
-									<View style={{flexDirection: 'column', width: '50%', borderRightWidth: 0.3, alignItems: 'center'}}>
-										<Text style={{fontWeight: 'bold', fontSize: 13}}>{date != null ? date : '-'}</Text>
-									</View>
-									<View style={{flexDirection: 'column', paddingLeft: 5, flex: 1, alignItems: 'center'}}>
-										<Text style={{fontWeight: 'bold', fontSize: 13}}>Jam Ke - {data != null ? data.current_hour : null}</Text>
-									</View>
-								</View>
-							</View>
-						</View>
-
-						<View style={{flexDirection: 'row'}}>
-							<View style={{flexDirection: 'column', borderTopWidth: 0.3, borderRightWidth: 0.3, padding: 15, justifyContent: 'center', alignItems: 'center', width: "50%", backgroundColor: '#dfe0df'}}>
-								<Text style={{marginTop: 1, fontWeight: 'bold', fontSize: 11}}>{mkt_customer_name != null ? mkt_customer_name : '-'}</Text>
-							</View>
-							<View style={{flexDirection: 'column', borderTopWidth: 0.3, justifyContent: 'center', alignItems: 'center', flex: 1}}>
-								<Text style={{fontWeight: 'bold', fontSize: 11}}>{product_name != null ? product_name : '-'}</Text>
-							</View>
-						</View>
-
-						<View style={{borderWidth: 0.5, flexDirection: 'row'}}>
-							<View style={{flex: 1, justifyContent: 'center', borderRightWidth: 0.3, alignItems: 'center', paddingHorizontal: 5, height: 25}}>
-								<Text style={{fontSize: 11, fontWeight: 'bold'}}>{product_internal_part_id != null ? product_internal_part_id : '-'}</Text>
-							</View>
-							<View style={{width: '33%', justifyContent: 'center', borderRightWidth: 0.3, alignItems: 'center', height: 25, paddingHorizontal: 5}}>
-								<Text style={{fontSize: 11, fontWeight: 'bold'}}>{product_customer_part_number != null ? product_customer_part_number : '-'}</Text>
-							</View>
-							<View style={{width: '33%', justifyContent: 'center', borderRightWidth: 0.3, alignItems: 'center', paddingHorizontal: 5, height: 25}}>
-								<Text style={{fontSize: 11, fontWeight: 'bold'}}>Model: {product_model != null ? product_model : '-'}</Text>
-							</View>
-						</View>
+						{header_form(object_header)}
 
 						{loading ? content() : <View style={{justifyContent: 'center'}}><ActivityIndicator size="large" color="#0000ff"/></View>}
 

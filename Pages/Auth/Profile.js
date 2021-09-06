@@ -43,14 +43,15 @@ const Profile = ({route, navigation}) => {
       <View style={{flex: 1, backgroundColor: '#f0f0f0'}}>
 
 				<View style={{paddingTop: 10, flexDirection: 'row', paddingLeft: 12, justifyContent: 'center'}}>
-					<View style={{alignItems: 'center', justifyContent: 'center', height: 127, width: 127, borderWidth: 0.5, borderRadius: 22}}>
-						{
-							user_image != null ?
-							<TouchableOpacity><Image source={{uri: user_image}} style={{width: 125, height: 125, resizeMode: 'cover', borderWidth: 0.5, borderRadius: 25}} /></TouchableOpacity> :
+					{
+						user_image != null ?
+						<View style={{alignItems: 'center', justifyContent: 'center', height: 127, width: 127}}>
+							<TouchableOpacity><Image source={{uri: user_image}} style={{width: 125, height: 125, resizeMode: 'cover', borderWidth: 0.5, borderRadius: 25}} /></TouchableOpacity>
+						</View> : 
+						<View style={{alignItems: 'center', justifyContent: 'center', height: 127, width: 127, borderWidth: 0.5, borderRadius: 22}}>
 							<TouchableOpacity><Image source={nopict} style={{width: 125, height: 125, resizeMode: 'cover', borderWidth: 0.5, borderRadius: 25}} /></TouchableOpacity>
-
-						}
-					</View>
+						</View>
+					}
 				</View>
 
 				<View style={{height: 100, margin: 15}}>
