@@ -13,6 +13,11 @@ import QCForm from './Main/Form/QC/qc_form';
 import LotOut from './Main/Form/LotOut/lot_out';
 import NewLotOut from './Main/Form/LotOut/new_lot_out';
 
+/**
+* kwkwkwkwkwkw
+*/
+
+
 export {
   SplashScreen,
   BoardingScreen,
