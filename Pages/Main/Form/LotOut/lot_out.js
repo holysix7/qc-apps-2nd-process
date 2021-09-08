@@ -183,7 +183,6 @@ const lot_out = ({route, navigation}) => {
             product_customer_part_number: val.product_customer_part_number,
             product_model: val.product_model,
             date: val.date,
-						screen: 'QC'
 					}
 					records.push( 
 						<View key={key} style={styles.contenDateProduct}>

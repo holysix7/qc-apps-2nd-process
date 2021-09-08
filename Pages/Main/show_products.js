@@ -16,6 +16,7 @@ import content_data from '../Templates/Content';
 const show_products = ({route, navigation}) => {
 	const {line_id, line_name, line_number, sys_plant_id, line_status, user_id} = route.params
 	const [data, setData] = useState([])
+	const [rework_access, setReworkAccess] = useState(false)
 	const [planning_date, setDate] = useState(new Date())
 	const [dept_name, setDeptName] = useState(null)
 	const [show, setShow] = useState(false)
@@ -69,6 +70,7 @@ const show_products = ({route, navigation}) => {
 		.then(response => {
 			setLoading(true)
       setRefreshing(false)
+			setReworkAccess(response.data.rework_access)
 			setData(response.data.data == null ? [] : response.data.data)
 			console.log("Products List Data: ", response.data.status, response.data.message)
 		})
@@ -127,35 +129,32 @@ const show_products = ({route, navigation}) => {
   }, []);
 
 	const buttonRework = () => {
-		// if(data.length > 0){
-		// 	if(data.rework_lot_out == true){
-		// 		var tampil_button = true
-		// 	}else{
-		// 		var tampil_button = false
-		// 	}
-		// }else{
-		// 	var tampil_button = false
-		// }
-		// if(tampil_button == true){
-		// 	return (
-		// 		<Button style={{justifyContent: 'center', backgroundColor: '#787A91', borderColor: '#1a508b', borderRadius: 15, flex: 1}} onPress={() => alert('Laporan Rework Under Maintenance')}>
-		// 			<Text style={{color: '#B2B1B9'}}>Laporan Rework Product Lot Out</Text>
-		// 		</Button>
-		// 	)
-		// }else{
-			return (
-				<Button style={{justifyContent: 'center', backgroundColor: '#1a508b', borderColor: '#1a508b', borderRadius: 15, flex: 1}} onPress={() => navigation.navigate('LotOut', {
-					line_id: line_id, 
-					line_name: line_name, 
-					line_number: line_number, 
-					sys_plant_id: sys_plant_id, 
-					line_status: line_status, 
-					user_id: user_id
-				})}>
-					<Text>Laporan Rework Product Lot Out</Text>
-				</Button>
-			)
-		// }
+		var tampil_button = false
+		var button = []
+		if(rework_access == true){
+			tampil_button = true
+		}else{
+			tampil_button = false
+		}
+		tampil_button == true ?
+		button.push(
+			<Button key={'button'} style={{justifyContent: 'center', backgroundColor: '#1a508b', borderColor: '#1a508b', borderRadius: 15, flex: 1}} onPress={() => navigation.navigate('LotOut', {
+				line_id: line_id, 
+				line_name: line_name, 
+				line_number: line_number, 
+				sys_plant_id: sys_plant_id, 
+				line_status: line_status, 
+				user_id: user_id
+			})}>
+				<Text>Laporan Rework Product Lot Out</Text>
+			</Button>
+		) :
+		button.push(
+			<Button key={'button'} style={{justifyContent: 'center', backgroundColor: '#1a508b', borderColor: '#1a508b', borderRadius: 15, flex: 1}} onPress={() => ('Maaf Anda Tidak Mempunyai Akses')}>
+				<Text>Laporan Rework Product Lot Out</Text>
+			</Button>
+		)
+		return button
 	}
 
 	return(
