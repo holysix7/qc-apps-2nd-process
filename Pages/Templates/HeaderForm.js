@@ -72,15 +72,12 @@ const header_form = (val) => {
         </View>
       )
     }else{
-      var title_text  = <Text style={{fontWeight: 'bold', textAlign: 'center'}}>{val.title}</Text>
+      var title_text  = <Text style={{fontWeight: 'bold', textAlign: 'center', paddingVertical: 10}}>{val.title}</Text>
       header_column_dua.push(
         <View style={{flexDirection: 'row'}} key={'rework'}>
           <View style={{flexDirection: 'column', flex: 1, borderTopWidth: 0.3, borderRightWidth: 0.3, justifyContent: 'center', alignItems: 'center', backgroundColor: '#dfe0df'}}>
             <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%'}}>
               {title_text}
-            </View>
-            <View style={{flexDirection: 'row', height: 40, justifyContent: 'center', alignItems: 'center'}}>
-              <Text style={{fontWeight: 'bold', fontSize: 17}}>{val != null ? val.line_name != null ? val.line_name : '-' : '-'}</Text>
             </View>
           </View>
         </View>

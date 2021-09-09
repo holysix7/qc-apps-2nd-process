@@ -15,16 +15,16 @@ import content_data from '../Templates/Content';
 
 const show_products = ({route, navigation}) => {
 	const {line_id, line_name, line_number, sys_plant_id, line_status, user_id} = route.params
-	const [data, setData] = useState([])
-	const [rework_access, setReworkAccess] = useState(false)
-	const [planning_date, setDate] = useState(new Date())
-	const [dept_name, setDeptName] = useState(null)
-	const [show, setShow] = useState(false)
-	const [loading, setLoading] = useState(false)
-  const [refreshing, setRefreshing] = useState(false)
-	var dateTime 					= moment()
-	var maximumDateFix		= moment(dateTime).add(1, 'days')
-	var choosenFixedDate 	= moment(planning_date).format("YYYY-MM-DD")
+	const [data, setData] 									= useState([])
+	const [rework_access, setReworkAccess] 	= useState(false)
+	const [planning_date, setDate] 					= useState(new Date())
+	const [dept_name, setDeptName] 					= useState(null)
+	const [show, setShow] 									= useState(false)
+	const [loading, setLoading] 						= useState(false)
+  const [refreshing, setRefreshing] 			= useState(false)
+	var dateTime 														= moment()
+	var maximumDateFix											= moment(dateTime).add(1, 'days')
+	var choosenFixedDate 										= moment(planning_date).format("YYYY-MM-DD")
   const object_header = {
     title: 'List Products By Machine',
     line_number: line_number, 
@@ -143,8 +143,8 @@ const show_products = ({route, navigation}) => {
 				line_name: line_name, 
 				line_number: line_number, 
 				sys_plant_id: sys_plant_id, 
+				user_id: user_id,
 				line_status: line_status, 
-				user_id: user_id
 			})}>
 				<Text>Laporan Rework Product Lot Out</Text>
 			</Button>
@@ -159,7 +159,7 @@ const show_products = ({route, navigation}) => {
 
 	return(
 		<Container>
-      {header_content(object_header)}
+      {header_content(object_header, 'ShowProducts')}
 			{loading ? null : <View style={{backgroundColor: '#dfe0df', alignItems: 'center', justifyContent: 'center'}}><ActivityIndicator size="large" color="#0000ff"/></View>}
 			{loading ? searchData() : null}
 			<View style={styles.contentFullWithPadding}>

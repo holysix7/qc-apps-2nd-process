@@ -38,7 +38,9 @@ const Main = ({navigation}) => {
     dept_name: deptName,
     duty_id: dutyId,
     user_nik: userNik,
-    user_image: employees_image
+    user_image: employees_image,
+    cekId: cekId,
+    user_id: user_id
   }
   
   useEffect(() => {

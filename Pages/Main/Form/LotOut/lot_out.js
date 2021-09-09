@@ -54,10 +54,10 @@ const lot_out = ({route, navigation}) => {
 			app_version: app_version,
 			sys_plant_id: sys_plant_id,
       user_id: user_id,
-			secproc_part_line_id: line_id,
 			start_date: new_val != null ? new_val : choosed_start_date,
 			type: 'product' 
 		}
+		console.log(params)
 		console.log(params)
 		axios.get(`${base_url}/api/v2/secprocs?`, {params: params, headers: headers})
 		.then(response => {
@@ -230,7 +230,7 @@ const lot_out = ({route, navigation}) => {
 
 	return(
 		<Container>
-      {header_content(object_header)}
+      {header_content(object_header, 'LotOut')}
 			{loading ? null : <View style={{backgroundColor: '#dfe0df', alignItems: 'center', justifyContent: 'center'}}><ActivityIndicator size="large" color="#0000ff"/></View>}
 			{loading ? searchData() : null}
 			<View style={styles.contentFullWithPadding}>
