@@ -13,11 +13,10 @@ import base_url from '../../../System/base_url';
 import header_content from '../../../Templates/HeaderShow';
 
 const lot_out = ({route, navigation}) => {
-	const {line_id, line_name, line_number, sys_plant_id, line_status, user_id} = route.params
+	const {sys_plant_id, sys_plant_name, user_id} = route.params
   const object_header = {
     title: 'List Parts Lot Out',
-    line_number: line_number, 
-    line_name: line_name
+		sys_plant_name: sys_plant_name
   }
 	const [data, setData]             = useState([])
 	const [code, setCode]             = useState(null)
@@ -157,24 +156,56 @@ const lot_out = ({route, navigation}) => {
     var records = []
 		if(code != 403){
 			if(data.length > 0){
-				data.map((val, key) => {
-					if(val.product_name.length > 28){
+				data.sort((a, b) => moment(b.date).format('x') - moment(a.date).format('x')).map((val, key) => {
+					if(val.product_name.length > 27){
 						var footer = { 
-							fontSize: 7, 
-							fontWeight: 'bold'
+							fontSize: 6, 
+							fontWeight: 'bold',
+							paddingLeft: 20
+						}
+					}else if(val.product_name.length > 29){
+						var footer = { 
+							fontSize: 5, 
+							fontWeight: 'bold',
+							paddingLeft: 20
 						}
 					}else{
 						var footer = { 
 							fontSize: 9, 
+							fontWeight: 'bold',
+							paddingLeft: 20
+						}
+					}
+					if(val.line_number.length > 1){
+						var line_style = {
+							fontWeight: 'bold', 
+							fontSize: 10, 
+							textAlign: 'center'
+						}
+					}else{
+						var line_style = {
+							fontWeight: 'bold', 
+							fontSize: 14, 
+							textAlign: 'center'
+						}
+					}
+					if(val.product_customer_part_number.length > 9){
+						var part_style = {
+							fontSize: 17, 
+							fontWeight: 'bold'
+						}
+					}else{
+						var part_style = {
+							fontSize: 20, 
 							fontWeight: 'bold'
 						}
 					}
 					var button_status = true
 					var route_params = {
 						sys_plant_id: sys_plant_id,
-						line_id: line_id,
-						line_name: line_name,
-            line_number: line_number,
+						line_id: val.line_id,
+						line_name: val.line_name,
+            line_number: val.line_number,
             eng_product_id: val.eng_product_id,
             mkt_customer_id: val.mkt_customer_id,
             mkt_customer_name: val.mkt_customer_name,
@@ -187,21 +218,18 @@ const lot_out = ({route, navigation}) => {
 					records.push( 
 						<View key={key} style={styles.contenDateProduct}>
 							<Button style={styles.productsButtonRunning} onPress={() => button_status == true ? navigation.navigate('NewLotOut', route_params) : alert('Maaf anda tidak memiliki akses') }>
-								<View style={{flexDirection: 'row'}}>
+								<View style={{flexDirection: 'row', alignItems: 'center'}}>
+									<View style={{flexDirection: 'column', justifyContent: 'center', height: 30, width: 55, borderRightWidth: 1, borderColor: 'white'}}>
+										<Text style={line_style}> {val.line_number} </Text>
+									</View>
 									<View style={{flexDirection: 'column', flex: 1}}>
-										<Text style={styles.fontButtonHeader}> {val.product_customer_part_number} </Text>   
+										<Text style={part_style}> {val.product_customer_part_number} </Text>   
 										<Text style={footer}> {val.product_name} </Text>   
 									</View>
-									<View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
-										<Text style={styles.fontButtonFooter}> {val.product_internal_part_id} </Text>   
-									</View>
-									{
-										val.operator_status == 'Ready' ? 
-										<View style={{flexDirection: 'column', justifyContent: 'center', marginRight: 5}}>
-											<Image source={operators} style={{width: 35, height: 35}} />
-										</View> :
-										null 
-									}
+									<View style={{flexDirection: 'column', justifyContent: 'space-between'}}>
+										<Text style={styles.fontButtonHeader}> {val.date} </Text>   
+										<Text style={footer}> {val.product_internal_part_id} </Text>   
+									</View> 
 								</View>
 							</Button>
 						</View>
@@ -211,7 +239,7 @@ const lot_out = ({route, navigation}) => {
 				records.push(
 					<View key={'content-data'} style={{width: '100%', padding: 25, flexDirection: 'row', justifyContent: 'center'}}>
 						<View style={{alignItems: 'center', justifyContent: 'center', height: 200, padding: 10, borderRadius: 10, backgroundColor: '#F3F2C9'}}>
-							<Text style={{textAlign: 'center', color: 'grey'}}>Tidak ada data Lot Out di {line_name} pada tanggal <Text style={{fontWeight: 'bold', color: 'grey'}}>{choosed_start_date}</Text></Text>
+							<Text style={{textAlign: 'center', color: 'grey'}}>Tidak ada data Lot Out di {sys_plant_name} pada tanggal <Text style={{fontWeight: 'bold', color: 'grey'}}>{choosed_start_date} dan 4 hari kebelakang</Text></Text>
 						</View>
 					</View>
 				)

@@ -16,6 +16,7 @@ import footer from '../Templates/Footer';
 const Main = ({navigation}) => {
   
   const [cekId, setCekId]                             = useState(null);
+  const [plant_name, setPlantName]                    = useState(null);
   const [user_id, setUserId]                          = useState(null);
   const [employees_image, setEmployeesImage]          = useState(null);
   const [name, setCekName]                            = useState("");
@@ -38,10 +39,12 @@ const Main = ({navigation}) => {
     dept_name: deptName,
     duty_id: dutyId,
     user_nik: userNik,
-    user_image: employees_image,
+    // user_image: employees_image,
     cekId: cekId,
-    user_id: user_id
+    user_id: user_id,
+    plant_name: plant_name,
   }
+  // console.log(object_footer)
   
   useEffect(() => {
     session()
@@ -66,6 +69,7 @@ const Main = ({navigation}) => {
     .then(response => {
       setLoading(true)
       setData(response.data.data)
+      setPlantName(response.data.data.length > 0 ? response.data.data[0].plant_name : null)
       setRefreshing(false)
       console.log("List Lines Data: ", response.data.status, "OK")
     })

@@ -15,6 +15,7 @@ const footer = (element, navigation) => {
 
       <TouchableOpacity style={{backgroundColor: '#19456b', justifyContent: 'center'}} onPress={() => navigation.navigate('LotOut', {
 				sys_plant_id: element.cekId, 
+				sys_plant_name: element.plant_name, 
 				user_id: element.user_id
       })}>
         <Text style={{borderWidth: 1, borderColor: 'white', borderRadius: 5, padding: 10, color: 'white'}}>Lot Out</Text>

@@ -5,6 +5,7 @@ import { Text } from 'native-base';
 import styles from '../Styles/Styling';
 
 const header_content = (val, type) => {
+  console.log(val)
   if(type != 'LotOut'){
     return (
       <View style={styles.headerWithBorder}>
@@ -24,7 +25,7 @@ const header_content = (val, type) => {
           <Image source={LogoSIP}/>
         </View>
         <View style={styles.contentHeader}>
-          {/* <Text style={styles.fontProduct}>PLANT {} </Text> */}
+          <Text style={styles.fontProduct}>PLANT {val.sys_plant_name} </Text>
           <Text style={styles.fontListProducts}>{val.title}</Text>
         </View>
       </View>
